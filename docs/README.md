@@ -1,6 +1,6 @@
 ---
 home: true
-heroImage: /hero.png
+heroImage: /logo.png
 heroText: Vue Camera Gestures
 tagline: Let users control your Vue app using AI, their camera, and gestures of their choice in just 1 line of HTML!
 actionText: Get Started →

@@ -38,7 +38,6 @@ Note that __the name and number of the events is completely configurable__ - you
 ## Installation
 ### via npm
 ```bash
-# npm
 npm i vue-camera-gestures --save
 ```
 Register the component globally
