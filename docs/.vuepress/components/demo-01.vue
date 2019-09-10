@@ -1,12 +1,19 @@
 <template>
-  <button @click="count ++">{{count}}</button>
+  <div>
+    <div>{{direction}}</div>
+    <camera-gestures @left="direction = 'Left'" @right="direction = 'Right'"></camera-gestures>
+  </div>
 </template>
 
 <script>
+import CameraGestures from "../../../dist/vue-camera-gestures.esm.js";
 export default {
+  components: {
+    CameraGestures
+  },
   data() {
     return {
-      count: 0
+      direction: "Left"
     };
   }
 };
