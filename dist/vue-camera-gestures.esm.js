@@ -2534,9 +2534,11 @@ var extendStatics$1=function(t,e){return (extendStatics$1=Object.setPrototypeOf|
 function __awaiter$4(t,a,e,s){return new(e||(e=Promise))(function(r,i){function n(t){try{o(s.next(t));}catch(t){i(t);}}function l(t){try{o(s.throw(t));}catch(t){i(t);}}function o(t){t.done?r(t.value):new e(function(a){a(t.value);}).then(n,l);}o((s=s.apply(t,a||[])).next());})}function __generator$4(t,a){var e,s,r,i,n={label:0,sent:function(){if(1&r[0]){ throw r[1]; }return r[1]},trys:[],ops:[]};return i={next:l(0),throw:l(1),return:l(2)},"function"==typeof Symbol&&(i[Symbol.iterator]=function(){return this}),i;function l(i){return function(l){return function(i){if(e){ throw new TypeError("Generator is already executing."); }for(;n;){ try{if(e=1,s&&(r=2&i[0]?s.return:i[0]?s.throw||((r=s.return)&&r.call(s),0):s.next)&&!(r=r.call(s,i[1])).done){ return r; }switch(s=0,r&&(i=[2&i[0],r.value]),i[0]){case 0:case 1:r=i;break;case 4:return n.label++,{value:i[1],done:!1};case 5:n.label++,s=i[1],i=[0];continue;case 7:i=n.ops.pop(),n.trys.pop();continue;default:if(!(r=(r=n.trys).length>0&&r[r.length-1])&&(6===i[0]||2===i[0])){n=0;continue}if(3===i[0]&&(!r||i[1]>r[0]&&i[1]<r[3])){n.label=i[1];break}if(6===i[0]&&n.label<r[1]){n.label=r[1],r=i;break}if(r&&n.label<r[2]){n.label=r[2],n.ops.push(i);break}r[2]&&n.ops.pop(),n.trys.pop();continue}i=a.call(t,n);}catch(t){i=[6,t],s=0;}finally{e=r=0;} }if(5&i[0]){ throw i[1]; }return {value:i[0]?i[1]:void 0,done:!0}}([i,l])}}}function concatWithNulls(t,a){return null==t&&null==a?null:null==t?a.clone():null===a?t.clone():t.concat(a,0)}function topK(t,a){for(var e=[],s=0;s<t.length;s++){ e.push({value:t[s],index:s}); }e.sort(function(t,a){return a.value-t.value});var r=new Float32Array(a),i=new Int32Array(a);for(s=0;s<a;s++){ r[s]=e[s].value,i[s]=e[s].index; }return {values:r,indices:i}}var KNNClassifier=function(){function t(){this.classDatasetMatrices={},this.classExampleCount={},this.labelToClassId={},this.nextClassId=0;}return t.prototype.addExample=function(t,a){var e=this;if(null==this.exampleShape&&(this.exampleShape=t.shape),!Y.arraysEqual(this.exampleShape,t.shape)){ throw new Error("Example shape provided, "+t.shape+" does not match previously provided example shapes "+this.exampleShape+"."); }this.clearTrainDatasetMatrix(),a in this.labelToClassId||(this.labelToClassId[a]=this.nextClassId++),Ue(function(){var s=e.normalizeVectorToUnitLength(t.flatten()),r=s.shape[0];if(null==e.classDatasetMatrices[a]){ e.classDatasetMatrices[a]=s.as2D(1,r); }else{var i=e.classDatasetMatrices[a].as2D(e.classExampleCount[a],r).concat(s.as2D(1,r),0);e.classDatasetMatrices[a].dispose(),e.classDatasetMatrices[a]=i;}ze(e.classDatasetMatrices[a]),null==e.classExampleCount[a]&&(e.classExampleCount[a]=0),e.classExampleCount[a]++;});},t.prototype.similarities=function(t){var a=this;return Ue(function(){var e=a.normalizeVectorToUnitLength(t.flatten()),s=e.shape[0];if(null==a.trainDatasetMatrix){var r=null;for(var i in a.classDatasetMatrices){ r=concatWithNulls(r,a.classDatasetMatrices[i]); }a.trainDatasetMatrix=r;}if(null==a.trainDatasetMatrix){ return console.warn("Cannot predict without providing training examples."),null; }ze(a.trainDatasetMatrix);var n=a.getNumExamples();return a.trainDatasetMatrix.as2D(n,s).matMul(e.as2D(s,1)).as1D()})},t.prototype.predictClass=function(t,a){return void 0===a&&(a=3),__awaiter$4(this,void 0,void 0,function(){var e,s,r,i,n=this;return __generator$4(this,function(l){switch(l.label){case 0:if(a<1){ throw new Error("Please provide a positive integer k value to predictClass."); }if(0===this.getNumExamples()){ throw new Error("You have not added any examples to the KNN classifier. Please add examples before calling predictClass."); }return e=Ue(function(){return n.similarities(t).asType("float32")}),s=Math.min(a,this.getNumExamples()),i=topK,[4,e.data()];case 1:return r=i.apply(void 0,[l.sent(),s]).indices,e.dispose(),[2,this.calculateTopClass(r,s)]}})})},t.prototype.clearClass=function(t){if(null==this.classDatasetMatrices[t]){ throw new Error("Cannot clear invalid class "+t); }delete this.classDatasetMatrices[t],delete this.classExampleCount[t],this.clearTrainDatasetMatrix();},t.prototype.clearAllClasses=function(){for(var t in this.classDatasetMatrices){ this.clearClass(t); }},t.prototype.getClassExampleCount=function(){return this.classExampleCount},t.prototype.getClassifierDataset=function(){return this.classDatasetMatrices},t.prototype.getNumClasses=function(){return Object.keys(this.classExampleCount).length},t.prototype.setClassifierDataset=function(t){for(var a in this.clearTrainDatasetMatrix(),this.classDatasetMatrices=t,t){ this.classExampleCount[a]=t[a].shape[0]; }},t.prototype.calculateTopClass=function(t,a){var e,s={};if(null==t){ return {classIndex:this.labelToClassId[e],label:e,confidences:s}; }var r={},i=0;for(var n in this.classDatasetMatrices){ i+=this.classExampleCount[n],r[n]=i; }var l={};for(var n in this.classDatasetMatrices){ l[n]=0; }for(var o=0;o<t.length;o++){var c=t[o];for(var n in this.classDatasetMatrices){ if(c<r[n]){l[n]++;break} }}var u=0;for(var n in this.classDatasetMatrices){var p=l[n]/a;p>u&&(u=p,e=n),s[n]=p;}return {classIndex:this.labelToClassId[e],label:e,confidences:s}},t.prototype.clearTrainDatasetMatrix=function(){null!=this.trainDatasetMatrix&&(this.trainDatasetMatrix.dispose(),this.trainDatasetMatrix=null);},t.prototype.normalizeVectorToUnitLength=function(t){return Ue(function(){var a=t.norm();return Su(t,a)})},t.prototype.getNumExamples=function(){var t=0;for(var a in this.classDatasetMatrices){ t+=this.classExampleCount[a]; }return t},t.prototype.dispose=function(){for(var t in this.clearTrainDatasetMatrix(),this.classDatasetMatrices){ this.classDatasetMatrices[t].dispose(); }},t}();function create(){return new KNNClassifier}
 
 //
+// K value for KNN
+var TOPK = 10;
+
 var script = {
-  mounted: async function() {
-    console.log("alsdjf lkasjd flka sjdfkl");
+  mounted: async function () {
     this.knn = create();
     this.mobilenet = await load();
     var stream = await navigator.mediaDevices.getUserMedia({
@@ -2545,7 +2547,88 @@ var script = {
     });
     this.$refs.video.srcObject = stream;
     this.$refs.video.play();
-    // this.timer = requestAnimationFrame(this.animate.bind(this));
+    this.animationFrameId = requestAnimationFrame(this.animate);
+    this.intervalId = setInterval(this.updateState, 2000);
+  },
+  data: function () {
+    return {
+      videoPlaying: false,
+      // can be "training", "testing" or "predicting"
+      state: 'training',
+      preparing: false,
+      gestures: ['Neutral', 'Left', 'Right'],
+      currentGestureIndex: -1,
+      prediction: null
+    }
+  },
+  methods: {
+    animate: async function animate () {
+      if (this.videoPlaying) {
+        // Get image data from video element
+        var image = ap.fromPixels(this.$refs.video);
+        switch (this.state) {
+          case 'training':
+            this.trainFrame(image);
+            break
+          case 'testing':
+            this.testFrame(image);
+            break
+          case 'predicting':
+            this.predictFrame(image);
+            break
+        }
+
+        image.dispose();
+      }
+      this.animationFrameId = requestAnimationFrame(this.animate);
+    },
+    trainFrame: function trainFrame (image) {
+      if (this.currentGestureIndex !== -1 && !this.preparing) {
+        var logits = this.mobilenet.infer(image, 'conv_preds');
+        this.knn.addExample(logits, this.currentGestureIndex);
+        logits.dispose();
+      }
+    },
+    testFrame: async function testFrame (image) {
+      if (this.currentGestureIndex !== -1) {
+        var logits = this.mobilenet.infer(image, 'conv_preds');
+        var res = await this.knn.predictClass(logits, TOPK);
+        console.log('testing: predicting that current gesture is index ' + res.classIndex + ' with confidence ' + (res.confidences[res.classIndex] * 100) + '%');
+        logits.dispose();
+      }
+    },
+    predictFrame: async function predictFrame (image) {
+      var logits = this.mobilenet.infer(image, 'conv_preds');
+      var res = await this.knn.predictClass(logits, TOPK);
+      // console.log('testing: predicting that current gesture is index ' + res.classIndex + ' with confidence ' + (res.confidences[res.classIndex] * 100) + '%')
+      this.prediction = this.gestures[res.classIndex];
+      logits.dispose();
+    },
+    updateState: function updateState () {
+      if (this.preparing) {
+        this.preparing = false;
+        return
+      }
+      if (this.currentGestureIndex < this.gestures.length - 1) {
+        this.currentGestureIndex++;
+        this.preparing = true;
+      } else {
+        // this.currentGestureIndex = 0
+        if (this.state === 'training') {
+          this.state = 'predicting';
+        } else {
+          this.state = 'predicting';
+          clearInterval(this.intervalId);
+        }
+      }
+    },
+    reset: function reset () {
+      this.knn.clearAllClasses();
+      this.state = 'training';
+      this.preparing = true;
+      this.currentGestureIndex = 0;
+      this.intervalId = setInterval(this.updateState, 2000);
+    }
   }
 };
 
@@ -2700,8 +2783,28 @@ var __vue_render__ = function() {
   return _c("div", [
     _c("video", {
       ref: "video",
-      attrs: { autoplay: "", playsinline: "", width: "227", height: "227" }
-    })
+      attrs: { autoplay: "", playsinline: "", width: "227", height: "227" },
+      on: {
+        playing: function($event) {
+          _vm.videoPlaying = true;
+        },
+        pause: function($event) {
+          _vm.videoPlaying = false;
+        }
+      }
+    }),
+    _vm._v(" "),
+    _c("p", [_vm._v("State: " + _vm._s(_vm.state))]),
+    _vm._v(" "),
+    _vm.preparing ? _c("p", [_vm._v("Prepare to")]) : _vm._e(),
+    _vm._v(" "),
+    _c("p", [
+      _vm._v("Gesture: " + _vm._s(_vm.gestures[_vm.currentGestureIndex]))
+    ]),
+    _vm._v(" "),
+    _c("p", [_vm._v("Prediction: " + _vm._s(_vm.prediction))]),
+    _vm._v(" "),
+    _c("button", { on: { click: _vm.reset } }, [_vm._v("Reset")])
   ])
 };
 var __vue_staticRenderFns__ = [];
@@ -2710,11 +2813,11 @@ __vue_render__._withStripped = true;
   /* style */
   var __vue_inject_styles__ = function (inject) {
     if (!inject) { return }
-    inject("data-v-467dbb90_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", map: {"version":3,"sources":[],"names":[],"mappings":"","file":"cameraGestures.vue"}, media: undefined });
+    inject("data-v-54528cd3_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* Mirror the video */\nvideo[data-v-54528cd3] {\n  transform: rotateY(180deg);\n  -webkit-transform: rotateY(180deg); /* Safari and Chrome */\n  -moz-transform: rotateY(180deg); /* Firefox */\n}\n", map: {"version":3,"sources":["/Users/daniel/Dropbox/Code/vue-camera-gestures/src/cameraGestures.vue"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AA4HA,qBAAA;AACA;EACA,0BAAA;EACA,kCAAA,EAAA,sBAAA;EACA,+BAAA,EAAA,YAAA;AACA","file":"cameraGestures.vue","sourcesContent":["<template>\n  <div>\n    <video\n      ref=\"video\"\n      autoplay\n      playsinline\n      width=\"227\"\n      height=\"227\"\n      @playing=\"videoPlaying = true\"\n      @pause=\"videoPlaying = false\"\n    ></video>\n    <p>State: {{state}}</p>\n    <p v-if=\"preparing\">Prepare to</p>\n    <p>Gesture: {{gestures[currentGestureIndex]}}</p>\n    <p>Prediction: {{prediction}}</p>\n    <button @click=\"reset\">Reset</button>\n  </div>\n</template>\n\n<script>\n// Heavily inspired by Charlie Gerard's teachable-keyboard https://github.com/charliegerard/teachable-keyboard\nimport * as mobilenetModule from '@tensorflow-models/mobilenet'\nimport * as tf from '@tensorflow/tfjs'\nimport * as knnClassifier from '@tensorflow-models/knn-classifier'\n// K value for KNN\nconst TOPK = 10\n\nexport default {\n  mounted: async function () {\n    this.knn = knnClassifier.create()\n    this.mobilenet = await mobilenetModule.load()\n    const stream = await navigator.mediaDevices.getUserMedia({\n      video: true,\n      audio: false\n    })\n    this.$refs.video.srcObject = stream\n    this.$refs.video.play()\n    this.animationFrameId = requestAnimationFrame(this.animate)\n    this.intervalId = setInterval(this.updateState, 2000)\n  },\n  data: function () {\n    return {\n      videoPlaying: false,\n      // can be \"training\", \"testing\" or \"predicting\"\n      state: 'training',\n      preparing: false,\n      gestures: ['Neutral', 'Left', 'Right'],\n      currentGestureIndex: -1,\n      prediction: null\n    }\n  },\n  methods: {\n    async animate () {\n      if (this.videoPlaying) {\n        // Get image data from video element\n        const image = tf.browser.fromPixels(this.$refs.video)\n        switch (this.state) {\n          case 'training':\n            this.trainFrame(image)\n            break\n          case 'testing':\n            this.testFrame(image)\n            break\n          case 'predicting':\n            this.predictFrame(image)\n            break\n        }\n\n        image.dispose()\n      }\n      this.animationFrameId = requestAnimationFrame(this.animate)\n    },\n    trainFrame (image) {\n      if (this.currentGestureIndex !== -1 && !this.preparing) {\n        const logits = this.mobilenet.infer(image, 'conv_preds')\n        this.knn.addExample(logits, this.currentGestureIndex)\n        logits.dispose()\n      }\n    },\n    async testFrame (image) {\n      if (this.currentGestureIndex !== -1) {\n        const logits = this.mobilenet.infer(image, 'conv_preds')\n        const res = await this.knn.predictClass(logits, TOPK)\n        console.log('testing: predicting that current gesture is index ' + res.classIndex + ' with confidence ' + (res.confidences[res.classIndex] * 100) + '%')\n        logits.dispose()\n      }\n    },\n    async predictFrame (image) {\n      const logits = this.mobilenet.infer(image, 'conv_preds')\n      const res = await this.knn.predictClass(logits, TOPK)\n      // console.log('testing: predicting that current gesture is index ' + res.classIndex + ' with confidence ' + (res.confidences[res.classIndex] * 100) + '%')\n      this.prediction = this.gestures[res.classIndex]\n      logits.dispose()\n    },\n    updateState () {\n      if (this.preparing) {\n        this.preparing = false\n        return\n      }\n      if (this.currentGestureIndex < this.gestures.length - 1) {\n        this.currentGestureIndex++\n        this.preparing = true\n      } else {\n        // this.currentGestureIndex = 0\n        if (this.state === 'training') {\n          this.state = 'predicting'\n        } else {\n          this.state = 'predicting'\n          clearInterval(this.intervalId)\n        }\n      }\n    },\n    reset () {\n      this.knn.clearAllClasses()\n      this.state = 'training'\n      this.preparing = true\n      this.currentGestureIndex = 0\n      this.intervalId = setInterval(this.updateState, 2000)\n    }\n  }\n}\n</script>\n\n<style scoped>\n/* Mirror the video */\nvideo {\n  transform: rotateY(180deg);\n  -webkit-transform: rotateY(180deg); /* Safari and Chrome */\n  -moz-transform: rotateY(180deg); /* Firefox */\n}\n</style>\n"]}, media: undefined });
 
   };
   /* scoped */
-  var __vue_scope_id__ = undefined;
+  var __vue_scope_id__ = "data-v-54528cd3";
   /* module identifier */
   var __vue_module_identifier__ = undefined;
   /* functional template */
