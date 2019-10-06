@@ -6,7 +6,10 @@ Vue Camera Gestures is a component that when placed on a page will
 - Emit events when the user performs the gestures
 
 ## Demo
-<demo-01></demo-01>
+<ClientOnly>
+  <demo-01></demo-01>
+</ClientOnly>
+
 ```html
 <template>
   <div>

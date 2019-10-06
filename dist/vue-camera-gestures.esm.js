@@ -2538,6 +2538,104 @@ function __awaiter$4(t,a,e,s){return new(e||(e=Promise))(function(r,i){function 
 var TOPK = 10;
 
 var script = {
+  name: 'CameraGestures',
+  props: {
+    fireOnce: {
+      type: Boolean,
+      default: true
+    },
+    gestures: {
+      type: Array
+    },
+    requiredAccuracy: {
+      type: Number,
+      default: 90
+    },
+    throttleEvents: {
+      type: Boolean,
+      default: false
+    },
+    trainingDelay: {
+      type: Number,
+      default: 1000
+    },
+    trainingPromptPrefix: {
+      type: String,
+      default: 'Perform a gesture: '
+    },
+    trainingTime: {
+      type: Number,
+      default: 3000
+    },
+    verificationDelay: {
+      type: Number,
+      default: 1000
+    },
+    verificationPromptPrefix: {
+      type: String,
+      default: 'Verify gesture: '
+    },
+    verificationTime: {
+      type: Number,
+      default: 1000
+    }
+  },
+  computed: {
+    computedGestures: function () {
+      var this$1 = this;
+
+      if (this.gestures === undefined) {
+        var reservedEventNames = [
+          'DONETRAINING',
+          'DONEVERIFICATION',
+          'NEUTRAL',
+          'VERIFICATIONFAILED'
+        ];
+        var filteredEventNames = Object.keys(this.$listeners).filter(function (x) { return !reservedEventNames.includes(x.toUpperCase); });
+        return filteredEventNames.map(function (x) {
+          // convert event name from camelCase to Sentence Case
+          var name = x.replace(/(A-Z)/g, ' $1');
+          name = name.charAt(0).toUpperCase() + name.slice(1);
+          return {
+            event: x,
+            fireOnce: this$1.fireOnce,
+            name: name,
+            requiredAccuracy: this$1.requiredAccuracy,
+            throttleEvent: this$1.throttleEvents,
+            trainingDelay: this$1.trainingDelay,
+            trainingPrompt: this$1.trainingPromptPrefix + name,
+            trainingTime: this$1.trainingTime,
+            verificationDelay: this$1.verificationDelay,
+            verificationPrompt: this$1.verificationPromptPrefix + name,
+            verificationTime: this$1.verificationTime,
+            isNeutral: false
+          }
+        })
+      }
+      return this.gestures.map(function (x) {
+        var name;
+        if (x.name) {
+          name = x.name;
+        } else {
+          name = x.event.replace(/(A-Z)/g, ' $1');
+          name = name.charAt(0).toUpperCase() + name.slice(1);
+        }
+        return {
+          event: x.event,
+          fireOnce: x.fireOnce === undefined ? this$1.fireOnce : x.fireOnce,
+          name: name,
+          requiredAccuracy: x.requiredAccuracy === undefined ? this$1.requiredAccuracy : x.requiredAccuracy,
+          throttleEvent: x.throttleEvent === undefined ? this$1.throttleEvents : x.throttleEvent,
+          trainingDelay: x.trainingDelay === undefined ? this$1.trainingDelay : x.trainingDelay,
+          trainingPrompt: x.trainingPrompt === undefined ? this$1.trainingPromptPrefix + name : x.trainingPrompt,
+          trainingTime: x.trainingTime === undefined ? this$1.trainingTime : x.trainingTime,
+          verificationDelay: x.verificationPromptPrefix === undefined ? this$1.verificationPromptPrefix : x.verificationPromptPrefix,
+          verificationPrompt: x.verificationPrompt === undefined ? this$1.verificationPromptPrefix + name : x.verificationPrompt,
+          verificationTime: x.verificationTime === undefined ? this$1.verificationTime : x.verificationTime
+        }
+      })
+    }
+  },
   mounted: async function () {
     this.knn = create();
     this.mobilenet = await load();
@@ -2556,7 +2654,6 @@ var script = {
       // can be "training", "testing" or "predicting"
       state: 'training',
       preparing: false,
-      gestures: ['Neutral', 'Left', 'Right'],
       currentGestureIndex: -1,
       prediction: null
     }
@@ -2601,7 +2698,8 @@ var script = {
       var logits = this.mobilenet.infer(image, 'conv_preds');
       var res = await this.knn.predictClass(logits, TOPK);
       // console.log('testing: predicting that current gesture is index ' + res.classIndex + ' with confidence ' + (res.confidences[res.classIndex] * 100) + '%')
-      this.prediction = this.gestures[res.classIndex];
+      this.prediction = this.computedGestures[res.classIndex];
+      this.$emit(this.prediction.event);
       logits.dispose();
     },
     updateState: function updateState () {
@@ -2609,7 +2707,7 @@ var script = {
         this.preparing = false;
         return
       }
-      if (this.currentGestureIndex < this.gestures.length - 1) {
+      if (this.currentGestureIndex < this.computedGestures.length - 1) {
         this.currentGestureIndex++;
         this.preparing = true;
       } else {
@@ -2798,9 +2896,14 @@ var __vue_render__ = function() {
     _vm._v(" "),
     _vm.preparing ? _c("p", [_vm._v("Prepare to")]) : _vm._e(),
     _vm._v(" "),
-    _c("p", [
-      _vm._v("Gesture: " + _vm._s(_vm.gestures[_vm.currentGestureIndex]))
-    ]),
+    _vm.currentGestureIndex > -1
+      ? _c("p", [
+          _vm._v(
+            "Gesture: " +
+              _vm._s(_vm.computedGestures[_vm.currentGestureIndex].name)
+          )
+        ])
+      : _vm._e(),
     _vm._v(" "),
     _c("p", [_vm._v("Prediction: " + _vm._s(_vm.prediction))]),
     _vm._v(" "),
@@ -2813,11 +2916,11 @@ __vue_render__._withStripped = true;
   /* style */
   var __vue_inject_styles__ = function (inject) {
     if (!inject) { return }
-    inject("data-v-54528cd3_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* Mirror the video */\nvideo[data-v-54528cd3] {\n  transform: rotateY(180deg);\n  -webkit-transform: rotateY(180deg); /* Safari and Chrome */\n  -moz-transform: rotateY(180deg); /* Firefox */\n}\n", map: {"version":3,"sources":["/Users/daniel/Dropbox/Code/vue-camera-gestures/src/cameraGestures.vue"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AA4HA,qBAAA;AACA;EACA,0BAAA;EACA,kCAAA,EAAA,sBAAA;EACA,+BAAA,EAAA,YAAA;AACA","file":"cameraGestures.vue","sourcesContent":["<template>\n  <div>\n    <video\n      ref=\"video\"\n      autoplay\n      playsinline\n      width=\"227\"\n      height=\"227\"\n      @playing=\"videoPlaying = true\"\n      @pause=\"videoPlaying = false\"\n    ></video>\n    <p>State: {{state}}</p>\n    <p v-if=\"preparing\">Prepare to</p>\n    <p>Gesture: {{gestures[currentGestureIndex]}}</p>\n    <p>Prediction: {{prediction}}</p>\n    <button @click=\"reset\">Reset</button>\n  </div>\n</template>\n\n<script>\n// Heavily inspired by Charlie Gerard's teachable-keyboard https://github.com/charliegerard/teachable-keyboard\nimport * as mobilenetModule from '@tensorflow-models/mobilenet'\nimport * as tf from '@tensorflow/tfjs'\nimport * as knnClassifier from '@tensorflow-models/knn-classifier'\n// K value for KNN\nconst TOPK = 10\n\nexport default {\n  mounted: async function () {\n    this.knn = knnClassifier.create()\n    this.mobilenet = await mobilenetModule.load()\n    const stream = await navigator.mediaDevices.getUserMedia({\n      video: true,\n      audio: false\n    })\n    this.$refs.video.srcObject = stream\n    this.$refs.video.play()\n    this.animationFrameId = requestAnimationFrame(this.animate)\n    this.intervalId = setInterval(this.updateState, 2000)\n  },\n  data: function () {\n    return {\n      videoPlaying: false,\n      // can be \"training\", \"testing\" or \"predicting\"\n      state: 'training',\n      preparing: false,\n      gestures: ['Neutral', 'Left', 'Right'],\n      currentGestureIndex: -1,\n      prediction: null\n    }\n  },\n  methods: {\n    async animate () {\n      if (this.videoPlaying) {\n        // Get image data from video element\n        const image = tf.browser.fromPixels(this.$refs.video)\n        switch (this.state) {\n          case 'training':\n            this.trainFrame(image)\n            break\n          case 'testing':\n            this.testFrame(image)\n            break\n          case 'predicting':\n            this.predictFrame(image)\n            break\n        }\n\n        image.dispose()\n      }\n      this.animationFrameId = requestAnimationFrame(this.animate)\n    },\n    trainFrame (image) {\n      if (this.currentGestureIndex !== -1 && !this.preparing) {\n        const logits = this.mobilenet.infer(image, 'conv_preds')\n        this.knn.addExample(logits, this.currentGestureIndex)\n        logits.dispose()\n      }\n    },\n    async testFrame (image) {\n      if (this.currentGestureIndex !== -1) {\n        const logits = this.mobilenet.infer(image, 'conv_preds')\n        const res = await this.knn.predictClass(logits, TOPK)\n        console.log('testing: predicting that current gesture is index ' + res.classIndex + ' with confidence ' + (res.confidences[res.classIndex] * 100) + '%')\n        logits.dispose()\n      }\n    },\n    async predictFrame (image) {\n      const logits = this.mobilenet.infer(image, 'conv_preds')\n      const res = await this.knn.predictClass(logits, TOPK)\n      // console.log('testing: predicting that current gesture is index ' + res.classIndex + ' with confidence ' + (res.confidences[res.classIndex] * 100) + '%')\n      this.prediction = this.gestures[res.classIndex]\n      logits.dispose()\n    },\n    updateState () {\n      if (this.preparing) {\n        this.preparing = false\n        return\n      }\n      if (this.currentGestureIndex < this.gestures.length - 1) {\n        this.currentGestureIndex++\n        this.preparing = true\n      } else {\n        // this.currentGestureIndex = 0\n        if (this.state === 'training') {\n          this.state = 'predicting'\n        } else {\n          this.state = 'predicting'\n          clearInterval(this.intervalId)\n        }\n      }\n    },\n    reset () {\n      this.knn.clearAllClasses()\n      this.state = 'training'\n      this.preparing = true\n      this.currentGestureIndex = 0\n      this.intervalId = setInterval(this.updateState, 2000)\n    }\n  }\n}\n</script>\n\n<style scoped>\n/* Mirror the video */\nvideo {\n  transform: rotateY(180deg);\n  -webkit-transform: rotateY(180deg); /* Safari and Chrome */\n  -moz-transform: rotateY(180deg); /* Firefox */\n}\n</style>\n"]}, media: undefined });
+    inject("data-v-e8a68430_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* Mirror the video */\nvideo[data-v-e8a68430] {\n  transform: rotateY(180deg);\n  -webkit-transform: rotateY(180deg); /* Safari and Chrome */\n  -moz-transform: rotateY(180deg); /* Firefox */\n}\n", map: {"version":3,"sources":["/Users/daniel/Dropbox/Code/vue-camera-gestures/src/cameraGestures.vue"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AA4NA,qBAAA;AACA;EACA,0BAAA;EACA,kCAAA,EAAA,sBAAA;EACA,+BAAA,EAAA,YAAA;AACA","file":"cameraGestures.vue","sourcesContent":["<template>\n  <div>\n    <video\n      ref=\"video\"\n      autoplay\n      playsinline\n      width=\"227\"\n      height=\"227\"\n      @playing=\"videoPlaying = true\"\n      @pause=\"videoPlaying = false\"\n    ></video>\n    <p>State: {{state}}</p>\n    <p v-if=\"preparing\">Prepare to</p>\n    <p v-if=\"currentGestureIndex > -1\">Gesture: {{computedGestures[currentGestureIndex].name}}</p>\n    <p>Prediction: {{prediction}}</p>\n    <button @click=\"reset\">Reset</button>\n  </div>\n</template>\n\n<script>\n// Heavily inspired by Charlie Gerard's teachable-keyboard https://github.com/charliegerard/teachable-keyboard\nimport * as mobilenetModule from '@tensorflow-models/mobilenet'\nimport * as tf from '@tensorflow/tfjs'\nimport * as knnClassifier from '@tensorflow-models/knn-classifier'\n// K value for KNN\nconst TOPK = 10\n\nexport default {\n  name: 'CameraGestures',\n  props: {\n    fireOnce: {\n      type: Boolean,\n      default: true\n    },\n    gestures: {\n      type: Array\n    },\n    requiredAccuracy: {\n      type: Number,\n      default: 90\n    },\n    throttleEvents: {\n      type: Boolean,\n      default: false\n    },\n    trainingDelay: {\n      type: Number,\n      default: 1000\n    },\n    trainingPromptPrefix: {\n      type: String,\n      default: 'Perform a gesture: '\n    },\n    trainingTime: {\n      type: Number,\n      default: 3000\n    },\n    verificationDelay: {\n      type: Number,\n      default: 1000\n    },\n    verificationPromptPrefix: {\n      type: String,\n      default: 'Verify gesture: '\n    },\n    verificationTime: {\n      type: Number,\n      default: 1000\n    }\n  },\n  computed: {\n    computedGestures: function () {\n      if (this.gestures === undefined) {\n        const reservedEventNames = [\n          'DONETRAINING',\n          'DONEVERIFICATION',\n          'NEUTRAL',\n          'VERIFICATIONFAILED'\n        ]\n        const filteredEventNames = Object.keys(this.$listeners).filter(x => !reservedEventNames.includes(x.toUpperCase))\n        return filteredEventNames.map(x => {\n          // convert event name from camelCase to Sentence Case\n          let name = x.replace(/(A-Z)/g, ' $1')\n          name = name.charAt(0).toUpperCase() + name.slice(1)\n          return {\n            event: x,\n            fireOnce: this.fireOnce,\n            name,\n            requiredAccuracy: this.requiredAccuracy,\n            throttleEvent: this.throttleEvents,\n            trainingDelay: this.trainingDelay,\n            trainingPrompt: this.trainingPromptPrefix + name,\n            trainingTime: this.trainingTime,\n            verificationDelay: this.verificationDelay,\n            verificationPrompt: this.verificationPromptPrefix + name,\n            verificationTime: this.verificationTime,\n            isNeutral: false\n          }\n        })\n      }\n      return this.gestures.map(x => {\n        let name\n        if (x.name) {\n          name = x.name\n        } else {\n          name = x.event.replace(/(A-Z)/g, ' $1')\n          name = name.charAt(0).toUpperCase() + name.slice(1)\n        }\n        return {\n          event: x.event,\n          fireOnce: x.fireOnce === undefined ? this.fireOnce : x.fireOnce,\n          name,\n          requiredAccuracy: x.requiredAccuracy === undefined ? this.requiredAccuracy : x.requiredAccuracy,\n          throttleEvent: x.throttleEvent === undefined ? this.throttleEvents : x.throttleEvent,\n          trainingDelay: x.trainingDelay === undefined ? this.trainingDelay : x.trainingDelay,\n          trainingPrompt: x.trainingPrompt === undefined ? this.trainingPromptPrefix + name : x.trainingPrompt,\n          trainingTime: x.trainingTime === undefined ? this.trainingTime : x.trainingTime,\n          verificationDelay: x.verificationPromptPrefix === undefined ? this.verificationPromptPrefix : x.verificationPromptPrefix,\n          verificationPrompt: x.verificationPrompt === undefined ? this.verificationPromptPrefix + name : x.verificationPrompt,\n          verificationTime: x.verificationTime === undefined ? this.verificationTime : x.verificationTime\n        }\n      })\n    }\n  },\n  mounted: async function () {\n    this.knn = knnClassifier.create()\n    this.mobilenet = await mobilenetModule.load()\n    const stream = await navigator.mediaDevices.getUserMedia({\n      video: true,\n      audio: false\n    })\n    this.$refs.video.srcObject = stream\n    this.$refs.video.play()\n    this.animationFrameId = requestAnimationFrame(this.animate)\n    this.intervalId = setInterval(this.updateState, 2000)\n  },\n  data: function () {\n    return {\n      videoPlaying: false,\n      // can be \"training\", \"testing\" or \"predicting\"\n      state: 'training',\n      preparing: false,\n      currentGestureIndex: -1,\n      prediction: null\n    }\n  },\n  methods: {\n    async animate () {\n      if (this.videoPlaying) {\n        // Get image data from video element\n        const image = tf.browser.fromPixels(this.$refs.video)\n        switch (this.state) {\n          case 'training':\n            this.trainFrame(image)\n            break\n          case 'testing':\n            this.testFrame(image)\n            break\n          case 'predicting':\n            this.predictFrame(image)\n            break\n        }\n\n        image.dispose()\n      }\n      this.animationFrameId = requestAnimationFrame(this.animate)\n    },\n    trainFrame (image) {\n      if (this.currentGestureIndex !== -1 && !this.preparing) {\n        const logits = this.mobilenet.infer(image, 'conv_preds')\n        this.knn.addExample(logits, this.currentGestureIndex)\n        logits.dispose()\n      }\n    },\n    async testFrame (image) {\n      if (this.currentGestureIndex !== -1) {\n        const logits = this.mobilenet.infer(image, 'conv_preds')\n        const res = await this.knn.predictClass(logits, TOPK)\n        console.log('testing: predicting that current gesture is index ' + res.classIndex + ' with confidence ' + (res.confidences[res.classIndex] * 100) + '%')\n        logits.dispose()\n      }\n    },\n    async predictFrame (image) {\n      const logits = this.mobilenet.infer(image, 'conv_preds')\n      const res = await this.knn.predictClass(logits, TOPK)\n      // console.log('testing: predicting that current gesture is index ' + res.classIndex + ' with confidence ' + (res.confidences[res.classIndex] * 100) + '%')\n      this.prediction = this.computedGestures[res.classIndex]\n      this.$emit(this.prediction.event)\n      logits.dispose()\n    },\n    updateState () {\n      if (this.preparing) {\n        this.preparing = false\n        return\n      }\n      if (this.currentGestureIndex < this.computedGestures.length - 1) {\n        this.currentGestureIndex++\n        this.preparing = true\n      } else {\n        // this.currentGestureIndex = 0\n        if (this.state === 'training') {\n          this.state = 'predicting'\n        } else {\n          this.state = 'predicting'\n          clearInterval(this.intervalId)\n        }\n      }\n    },\n    reset () {\n      this.knn.clearAllClasses()\n      this.state = 'training'\n      this.preparing = true\n      this.currentGestureIndex = 0\n      this.intervalId = setInterval(this.updateState, 2000)\n    }\n  }\n}\n</script>\n\n<style scoped>\n/* Mirror the video */\nvideo {\n  transform: rotateY(180deg);\n  -webkit-transform: rotateY(180deg); /* Safari and Chrome */\n  -moz-transform: rotateY(180deg); /* Firefox */\n}\n</style>\n"]}, media: undefined });
 
   };
   /* scoped */
-  var __vue_scope_id__ = "data-v-54528cd3";
+  var __vue_scope_id__ = "data-v-e8a68430";
   /* module identifier */
   var __vue_module_identifier__ = undefined;
   /* functional template */
@@ -2843,6 +2946,11 @@ function install(Vue) {
   install.installed = true;
   Vue.component('CameraGestures', cameraGestures);
 }
+
+// Polyfill btoa
+window.btoa = window.btoa || function btoa(b) {
+    return new Buffer(b).toString('base64');
+};
 
 // Create module definition for Vue.use()
 var plugin = {
