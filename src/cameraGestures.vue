@@ -11,7 +11,7 @@
     ></video>
     <p>State: {{state}}</p>
     <p v-if="preparing">Prepare to</p>
-    <p>Gesture: {{gestures[currentGestureIndex]}}</p>
+    <p v-if="currentGestureIndex > -1">Gesture: {{computedGestures[currentGestureIndex].name}}</p>
     <p>Prediction: {{prediction}}</p>
     <button @click="reset">Reset</button>
   </div>
@@ -26,6 +26,102 @@ import * as knnClassifier from '@tensorflow-models/knn-classifier'
 const TOPK = 10
 
 export default {
+  name: 'CameraGestures',
+  props: {
+    fireOnce: {
+      type: Boolean,
+      default: true
+    },
+    gestures: {
+      type: Array
+    },
+    requiredAccuracy: {
+      type: Number,
+      default: 90
+    },
+    throttleEvents: {
+      type: Boolean,
+      default: false
+    },
+    trainingDelay: {
+      type: Number,
+      default: 1000
+    },
+    trainingPromptPrefix: {
+      type: String,
+      default: 'Perform a gesture: '
+    },
+    trainingTime: {
+      type: Number,
+      default: 3000
+    },
+    verificationDelay: {
+      type: Number,
+      default: 1000
+    },
+    verificationPromptPrefix: {
+      type: String,
+      default: 'Verify gesture: '
+    },
+    verificationTime: {
+      type: Number,
+      default: 1000
+    }
+  },
+  computed: {
+    computedGestures: function () {
+      if (this.gestures === undefined) {
+        const reservedEventNames = [
+          'DONETRAINING',
+          'DONEVERIFICATION',
+          'NEUTRAL',
+          'VERIFICATIONFAILED'
+        ]
+        const filteredEventNames = Object.keys(this.$listeners).filter(x => !reservedEventNames.includes(x.toUpperCase))
+        return filteredEventNames.map(x => {
+          // convert event name from camelCase to Sentence Case
+          let name = x.replace(/(A-Z)/g, ' $1')
+          name = name.charAt(0).toUpperCase() + name.slice(1)
+          return {
+            event: x,
+            fireOnce: this.fireOnce,
+            name,
+            requiredAccuracy: this.requiredAccuracy,
+            throttleEvent: this.throttleEvents,
+            trainingDelay: this.trainingDelay,
+            trainingPrompt: this.trainingPromptPrefix + name,
+            trainingTime: this.trainingTime,
+            verificationDelay: this.verificationDelay,
+            verificationPrompt: this.verificationPromptPrefix + name,
+            verificationTime: this.verificationTime,
+            isNeutral: false
+          }
+        })
+      }
+      return this.gestures.map(x => {
+        let name
+        if (x.name) {
+          name = x.name
+        } else {
+          name = x.event.replace(/(A-Z)/g, ' $1')
+          name = name.charAt(0).toUpperCase() + name.slice(1)
+        }
+        return {
+          event: x.event,
+          fireOnce: x.fireOnce === undefined ? this.fireOnce : x.fireOnce,
+          name,
+          requiredAccuracy: x.requiredAccuracy === undefined ? this.requiredAccuracy : x.requiredAccuracy,
+          throttleEvent: x.throttleEvent === undefined ? this.throttleEvents : x.throttleEvent,
+          trainingDelay: x.trainingDelay === undefined ? this.trainingDelay : x.trainingDelay,
+          trainingPrompt: x.trainingPrompt === undefined ? this.trainingPromptPrefix + name : x.trainingPrompt,
+          trainingTime: x.trainingTime === undefined ? this.trainingTime : x.trainingTime,
+          verificationDelay: x.verificationPromptPrefix === undefined ? this.verificationPromptPrefix : x.verificationPromptPrefix,
+          verificationPrompt: x.verificationPrompt === undefined ? this.verificationPromptPrefix + name : x.verificationPrompt,
+          verificationTime: x.verificationTime === undefined ? this.verificationTime : x.verificationTime
+        }
+      })
+    }
+  },
   mounted: async function () {
     this.knn = knnClassifier.create()
     this.mobilenet = await mobilenetModule.load()
@@ -44,7 +140,6 @@ export default {
       // can be "training", "testing" or "predicting"
       state: 'training',
       preparing: false,
-      gestures: ['Neutral', 'Left', 'Right'],
       currentGestureIndex: -1,
       prediction: null
     }
@@ -89,7 +184,8 @@ export default {
       const logits = this.mobilenet.infer(image, 'conv_preds')
       const res = await this.knn.predictClass(logits, TOPK)
       // console.log('testing: predicting that current gesture is index ' + res.classIndex + ' with confidence ' + (res.confidences[res.classIndex] * 100) + '%')
-      this.prediction = this.gestures[res.classIndex]
+      this.prediction = this.computedGestures[res.classIndex]
+      this.$emit(this.prediction.event)
       logits.dispose()
     },
     updateState () {
@@ -97,7 +193,7 @@ export default {
         this.preparing = false
         return
       }
-      if (this.currentGestureIndex < this.gestures.length - 1) {
+      if (this.currentGestureIndex < this.computedGestures.length - 1) {
         this.currentGestureIndex++
         this.preparing = true
       } else {
