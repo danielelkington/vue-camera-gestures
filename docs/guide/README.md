@@ -61,14 +61,48 @@ export default {
 }
 </script>
 ```
+You can ignore the peer dependency warning as the Tensorflow JS libraries are bundled with the component.
 ### via CDN
 ```html
 <script src="https://unpkg.com/vue-camera-gestures"></script>
 ```
-Then register the component.
-```js
-Vue.component('camera-gestures', VueCameraGestures.CameraGestures)
+## Installing without the bundled version of Tensorflow
+By default the Tensorflow JS library is bundled with the component, but this may not be the desired behaviour, such as if you are separately using Tensorflow in your project. The library can be imported without Tensorflow as follows:
+### via npm
+```bash
+npm i @tensorflow/tfjs --save
+npm i @tensorflow-models/knn-classifier --save
+npm i @tensorflow-models/mobilenet --save
+npm i vue-camera-gestures --save
 ```
+
+Register the component globally
+```js
+import CameraGestures from 'vue-camera-gestures/dist/vue-camera-gestures-plain.esm.js'
+
+Vue.component('camera-gestures', CameraGestures)
+```
+Or register it in a Single File Component
+```html
+<script>
+import CameraGestures from 'vue-camera-gestures/dist/vue-camera-gestures-plain.esm.js'
+
+export default {
+  components: {
+    CameraGestures
+  }
+}
+</script>
+```
+
+### via CDN
+```html
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
+<script src="https://unpkg.com/vue-camera-gestures/dist/vue-camera-gestures-plain.min.js"></script>
+```
+
 # Getting Started
 The simplest way to specify both the gestures to be trained and to subscribe to events is to simply subscribe to an event with a name of your choice. Please note that there are a number of reserved event names.
 ```html

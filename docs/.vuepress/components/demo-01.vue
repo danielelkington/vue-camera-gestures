@@ -1,7 +1,10 @@
 <template>
   <div>
     <div>{{direction}}</div>
-    <camera-gestures @left="direction = 'Left'" @right="direction = 'Right'"></camera-gestures>
+    <camera-gestures
+      @left="direction = 'Left'"
+      @right="direction = 'Right'"
+    ></camera-gestures>
   </div>
 </template>
 
@@ -11,7 +14,7 @@ export default {
   components: {
     CameraGestures
   },
-  data() {
+  data () {
     return {
       direction: "Left"
     };

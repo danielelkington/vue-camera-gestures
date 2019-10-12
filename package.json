@@ -1,6 +1,6 @@
 {
   "name": "vue-camera-gestures",
-  "version": "0.1.0",
+  "version": "0.0.2",
   "description": "Let users control your Vue app using AI and their camera in just 1 line of HTML!",
   "main": "dist/vue-camera-gestures.umd.js",
   "module": "dist/vue-camera-gestures.esm.js",
@@ -9,12 +9,15 @@
     "./sfc": "src/vue-camera-gestures.vue"
   },
   "scripts": {
-    "build": "npm run build:umd & npm run build:es & npm run build:unpkg",
-    "build:umd": "rollup --config build/rollup.config.js --format umd --file dist/vue-camera-gestures.umd.js",
-    "build:es": "rollup --config build/rollup.config.js --format es --file dist/vue-camera-gestures.esm.js",
-    "build:unpkg": "rollup --config build/rollup.config.js --format iife --file dist/vue-camera-gestures.min.js",
-    "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs"
+    "build": "npm run build:umd & npm run build:es & npm run build:unpkg & npm run build:umd-no-dependencies & npm run build:es-no-dependencies & npm run build:unpkg-no-dependencies",
+    "build:umd": "rollup --config build/rollup-with-dependencies.config.js --format umd --file dist/vue-camera-gestures.umd.js",
+    "build:es": "rollup --config build/rollup-with-dependencies.config.js --format es --file dist/vue-camera-gestures.esm.js",
+    "build:unpkg": "rollup --config build/rollup-with-dependencies.config.js --format iife --file dist/vue-camera-gestures.min.js",
+    "build:umd-no-dependencies": "rollup --config build/rollup-no-dependencies.config.js --format umd --file dist/vue-camera-gestures-plain.umd.js",
+    "build:es-no-dependencies": "rollup --config build/rollup-no-dependencies.config.js --format es --file dist/vue-camera-gestures-plain.esm.js",
+    "build:unpkg-no-dependencies": "rollup --config build/rollup-no-dependencies.config.js --format iife --file dist/vue-camera-gestures-plain.min.js",
+    "docs:dev": "npm run build && vuepress dev docs",
+    "docs:build": "npm run build && vuepress build docs"
   },
   "repository": {
     "type": "git",
@@ -33,6 +36,9 @@
   },
   "homepage": "https://github.com/danielelkington/vue-camera-gestures#readme",
   "devDependencies": {
+    "@tensorflow/tfjs": "^1.2.9",
+    "@tensorflow-models/knn-classifier": "^1.2.1",
+    "@tensorflow-models/mobilenet": "^2.0.4",
     "rollup": "^1.21.2",
     "rollup-plugin-buble": "^0.19.2",
     "rollup-plugin-commonjs": "^10.1.0",
@@ -43,10 +49,9 @@
     "vue-template-compiler": "^2.5.16",
     "vuepress": "^1.1.0"
   },
-  "dependencies": {
-    "@babel/polyfill": "^7.6.0",
+  "peerDependencies": {
+    "@tensorflow/tfjs": "^1.2.9",
     "@tensorflow-models/knn-classifier": "^1.2.1",
-    "@tensorflow-models/mobilenet": "^2.0.4",
-    "@tensorflow/tfjs": "^1.2.9"
+    "@tensorflow-models/mobilenet": "^2.0.4"
   }
 }

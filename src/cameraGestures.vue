@@ -19,9 +19,9 @@
 
 <script>
 // Heavily inspired by Charlie Gerard's teachable-keyboard https://github.com/charliegerard/teachable-keyboard
-import * as mobilenetModule from '@tensorflow-models/mobilenet'
-import * as tf from '@tensorflow/tfjs'
-import * as knnClassifier from '@tensorflow-models/knn-classifier'
+import { load as loadMobilenetModule } from '@tensorflow-models/mobilenet'
+import { browser as tfBrowser } from '@tensorflow/tfjs'
+import { create as createKnnClassifier } from '@tensorflow-models/knn-classifier'
 // K value for KNN
 const TOPK = 10
 
@@ -123,8 +123,8 @@ export default {
     }
   },
   mounted: async function () {
-    this.knn = knnClassifier.create()
-    this.mobilenet = await mobilenetModule.load()
+    this.knn = createKnnClassifier()
+    this.mobilenet = await loadMobilenetModule()
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: false
@@ -148,7 +148,7 @@ export default {
     async animate () {
       if (this.videoPlaying) {
         // Get image data from video element
-        const image = tf.browser.fromPixels(this.$refs.video)
+        const image = tfBrowser.fromPixels(this.$refs.video)
         switch (this.state) {
           case 'training':
             this.trainFrame(image)
