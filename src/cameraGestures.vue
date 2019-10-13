@@ -5,11 +5,20 @@
       autoplay
       playsinline
       width="227"
-      height="227"
       @playing="videoPlaying = true"
       @pause="videoPlaying = false"
     ></video>
-    <p>State: {{state}}</p>
+    <slot
+      name="progress"
+      :inProgress="showProgressBar"
+      :progress="progress"
+    >
+      <div
+        :style="{width: (progress * 227.0) + 'px'}"
+        :class="{invisible: !showProgressBar}"
+        class="progress-bar"
+      ></div>
+    </slot>
     <slot
       name="instructions"
       :training="state === 'training'"
@@ -172,6 +181,9 @@ export default {
         }
       }
       return undefined
+    },
+    showProgressBar: function () {
+      return this.currentGestureIndex !== -1 && !this.preparing
     }
   },
   mounted: async function () {
@@ -194,7 +206,10 @@ export default {
       preparing: false,
       // -1 indicates nothing, -2 indicates neutral
       currentGestureIndex: -1,
-      prediction: null
+      prediction: null,
+      timeStartedWaiting: null,
+      timeToFinishWaiting: null,
+      progress: 0
     }
   },
   methods: {
@@ -251,6 +266,7 @@ export default {
       if (this.preparing) {
         this.preparing = false
         this.scheduleUpdateState()
+        requestAnimationFrame(this.updateProgress)
         return
       }
       // Go to neutral in current cycle if necessary
@@ -313,7 +329,21 @@ export default {
       } else {
         return
       }
+      this.timeStartedWaiting = new Date().getTime()
+      this.timeToFinishWaiting = this.timeStartedWaiting + millisecondsToWait
       this.updateStateTimeoutId = setTimeout(this.updateState, millisecondsToWait)
+    },
+    updateProgress () {
+      const total = this.timeToFinishWaiting - this.timeStartedWaiting
+      const currentMilliseconds = new Date().getTime() - this.timeStartedWaiting
+      if (currentMilliseconds > total) {
+        this.progress = 1.0
+      } else {
+        this.progress = currentMilliseconds / total
+      }
+      if (this.showProgressBar) {
+        requestAnimationFrame(this.updateProgress)
+      }
     },
     reset () {
       this.knn.clearAllClasses()
@@ -348,5 +378,12 @@ video {
   transform: rotateY(180deg);
   -webkit-transform: rotateY(180deg); /* Safari and Chrome */
   -moz-transform: rotateY(180deg); /* Firefox */
+}
+.progress-bar {
+  height: 5px;
+  background: black;
+}
+.progress-bar.invisible {
+  background: none;
 }
 </style>
