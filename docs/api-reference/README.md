@@ -14,9 +14,9 @@
 | __showCameraFeed DuringVerification__ | `Boolean` | `true` | Whether the camera feed will be displayed while verifying gestures.|
 | __throttleEvents__ | `Number` | `0` | Only has an effect if `fireOnce` is false. Throttles how often an event gets fired (in milliseconds) if the user persists with a gesture. If 0, the event will be fired each frame the user continues persisting with the gesture.|
 | __trainingDelay__ | `Number` | `1000` | The number of milliseconds to wait after first displaying a prompt to train a gesture before the training of that gesture commences. Should be high enough to give the user time to start doing that gesture.|
+| __trainingPromptPrefix__ | `String` | `'Perform a gesture: '` | Displayed before a gesture name when training the model.|
 | __trainingTime__ | `Number` | `3000` | The number of milliseconds to spend taking snapshots from the camera feed and using them to train a model for a gesture.|
 | __trainNeutralLast__ | `Boolean` | `false` | By default, the neutral gesture is trained and verified first. If this prop is true, it will be trained and verified last.|
-| __trainingPromptPrefix__ | `String` | `'Perform a gesture: '` | Displayed before a gesture name when training the model.|
 | __verificationDelay__ | `Number` | `1000` | The number of milliseconds to wait after first displaying a prompt to verify a gesture before the verification of that gesture commences. Should be high enough to give the user time to start doing that gesture.|
 | __verificationPrompt Prefix__ | `String` | `'Verify gesture: '` | Displayed before a gesture name when verifying the model.|
 | __verificationTime__ | `Number` | `1000` | The number of milliseconds to spend taking snapshots from the camera feed and using them to verify that a gesture has been successfully trained.|

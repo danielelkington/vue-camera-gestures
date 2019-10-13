@@ -7,6 +7,7 @@
       width="227"
       @playing="videoPlaying = true"
       @pause="videoPlaying = false"
+      v-show="showCameraFeed"
     ></video>
     <slot
       name="progress"
@@ -22,7 +23,7 @@
     <slot
       name="instructions"
       :training="state === 'training'"
-      :verifying="state === 'verifying'"
+      :verifying="state === 'testing'"
       :event="currentEvent"
       :eventName="currentEventName"
     >
@@ -36,7 +37,7 @@
 <script>
 // Heavily inspired by Charlie Gerard's teachable-keyboard https://github.com/charliegerard/teachable-keyboard
 import { load as loadMobilenetModule } from '@tensorflow-models/mobilenet'
-import { browser as tfBrowser } from '@tensorflow/tfjs'
+import { browser as tfBrowser, tensor } from '@tensorflow/tfjs'
 import { create as createKnnClassifier } from '@tensorflow-models/knn-classifier'
 // K value for KNN
 const TOPK = 10
@@ -44,12 +45,19 @@ const TOPK = 10
 export default {
   name: 'CameraGestures',
   props: {
+    doVerification: {
+      type: Boolean,
+      default: true
+    },
     fireOnce: {
       type: Boolean,
       default: true
     },
     gestures: {
       type: Array
+    },
+    model: {
+      type: String
     },
     neutralTrainingPrompt: {
       type: String,
@@ -62,6 +70,18 @@ export default {
     requiredAccuracy: {
       type: Number,
       default: 90
+    },
+    showCameraFeedAfterTrainingCycle: {
+      type: Boolean,
+      default: true
+    },
+    showCameraFeedDuringTraining: {
+      type: Boolean,
+      default: true
+    },
+    showCameraFeedDuringVerification: {
+      type: Boolean,
+      default: true
     },
     throttleEvents: {
       type: Number,
@@ -182,6 +202,13 @@ export default {
       }
       return undefined
     },
+    showCameraFeed: function () {
+      switch (this.state) {
+        case 'training': return this.showCameraFeedDuringTraining
+        case 'testing': return this.showCameraFeedDuringVerification
+        default: return this.showCameraFeedAfterTrainingCycle
+      }
+    },
     showProgressBar: function () {
       return this.currentGestureIndex !== -1 && !this.preparing
     }
@@ -291,6 +318,13 @@ export default {
       logits.dispose()
     },
     updateState () {
+      // Model provided - skip everything and just use the given model
+      if (this.model) {
+        this.loadModelFromJson(this.model)
+        this.state = 'predicting'
+        this.currentGestureIndex = -1
+        return
+      }
       if (this.preparing) {
         this.preparing = false
         this.scheduleUpdateState()
@@ -307,6 +341,7 @@ export default {
         if (accuracy < requiredAccuracy) {
           if (this.verifyingRetried) {
             // Go back to start
+            this.$emit('verificationFailed', this.getModelJson())
             this.reset()
             return
           } else {
@@ -334,11 +369,16 @@ export default {
       // Move state up one
       if ((this.currentGestureIndex === -2 && this.trainNeutralLast) ||
         doneLastGesture) {
-        if (this.state === 'training') {
+        if (this.state === 'training' && this.doVerification) {
+          this.$emit('doneTraining', this.getModelJson())
           this.state = 'testing'
           this.currentGestureIndex = !this.trainNeutralLast ? -2 : 0
           this.preparing = true
         } else {
+          if (this.state === 'testing') {
+            // verification completed successfully!
+            this.$emit('doneVerification', this.getModelJson())
+          }
           this.state = 'predicting'
           this.currentGestureIndex = -1
         }
@@ -374,7 +414,7 @@ export default {
         } else if (this.currentGestureIndex > -1) {
           millisecondsToWait = this.preparing
             ? this.currentGesture.verificationDelay
-            : this.verificationTime
+            : this.currentGesture.verificationTime
         } else {
           return
         }
@@ -420,7 +460,29 @@ export default {
       } else {
         return classIndex === 0 ? -2 : classIndex - 1
       }
+    },
+    getModelJson () {
+      // With thanks to https://github.com/tensorflow/tfjs/issues/633#issuecomment-456308218
+      const dataset = this.knn.getClassifierDataset()
+      const datasetObj = {}
+      Object.keys(dataset).forEach(key => {
+        const data = dataset[key].dataSync()
+        datasetObj[key] = Array.from(data)
+      })
+      return JSON.stringify(datasetObj)
+    },
+    loadModelFromJson (json) {
+      // With thanks to https://github.com/tensorflow/tfjs/issues/633#issuecomment-456308218
+      const tensorObj = JSON.parse(json)
+      // convert back to tensor
+      Object.keys(tensorObj).forEach(key => {
+        tensorObj[key] = tensor(tensorObj[key], [tensorObj[key].length / 1000, 1000])
+      })
+      this.knn.setClassifierDataset(tensorObj)
     }
+  },
+  destroyed: function () {
+    this.knn.dispose()
   }
 }
 </script>

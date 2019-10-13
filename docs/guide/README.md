@@ -205,6 +205,7 @@ The camera feed can be turned off at various points using the `showCameraFeedDur
   :showCameraFeedAfterTrainingCycle="false"
   ></camera-gestures>
 ```
+Note that this will still render the video element in the DOM due to TensorFlow requirements - it will just be hidden.
 ### Customizing the progress bar
 The progress bar can be customized using the `progress` slot. The slot props object contains the following properties:
 - `inProgress`: `Boolean` Whether something is in progress and a progress bar should be displayed
@@ -312,6 +313,9 @@ This can also be customized per gesture.
 </camera-gestures>
 ```
 ## Saving the generated model
+::: warning
+This feature is very experimental and probably isn't going to work very well yet.
+:::
 Due to differences in lighting conditions, how far the user is positioned from the camera, background noise, choice of gestures, etc, for best results it is recommended that gestures be trained each time before the user uses them.
 
 It is, however, possible to save and load models generated through training. A trained model can be retrieved by subscribing to the @doneTraining event.
