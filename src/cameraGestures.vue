@@ -10,9 +10,16 @@
       @pause="videoPlaying = false"
     ></video>
     <p>State: {{state}}</p>
-    <p v-if="preparing">Prepare to</p>
-    <p v-if="currentGestureIndex > -1">Gesture: {{computedGestures[currentGestureIndex].name}}</p>
-    <p>Prediction: {{prediction}}</p>
+    <slot
+      name="instructions"
+      :training="state === 'training'"
+      :verifying="state === 'verifying'"
+      :event="currentEvent"
+      :eventName="currentEventName"
+    >
+      <p v-show="currentInstruction">{{currentInstruction}}</p>
+    </slot>
+
     <button @click="reset">Reset</button>
   </div>
 </template>
@@ -35,6 +42,14 @@ export default {
     gestures: {
       type: Array
     },
+    neutralTrainingPrompt: {
+      type: String,
+      default: 'Maintain a neutral position'
+    },
+    neutralVerificationPrompt: {
+      type: String,
+      default: 'Verify neutral position'
+    },
     requiredAccuracy: {
       type: Number,
       default: 90
@@ -54,6 +69,10 @@ export default {
     trainingTime: {
       type: Number,
       default: 3000
+    },
+    trainNeutralLast: {
+      type: Boolean,
+      default: false
     },
     verificationDelay: {
       type: Number,
@@ -77,7 +96,7 @@ export default {
           'NEUTRAL',
           'VERIFICATIONFAILED'
         ]
-        const filteredEventNames = Object.keys(this.$listeners).filter(x => !reservedEventNames.includes(x.toUpperCase))
+        const filteredEventNames = Object.keys(this.$listeners).filter(x => !reservedEventNames.includes(x.toUpperCase()))
         return filteredEventNames.map(x => {
           // convert event name from camelCase to Sentence Case
           let name = x.replace(/(A-Z)/g, ' $1')
@@ -120,6 +139,39 @@ export default {
           verificationTime: x.verificationTime === undefined ? this.verificationTime : x.verificationTime
         }
       })
+    },
+    currentGesture: function () {
+      return this.currentGestureIndex > -1
+        ? this.computedGestures[this.currentGestureIndex]
+        : undefined
+    },
+    currentEvent: function () {
+      switch (this.currentGestureIndex) {
+        case -2: return 'neutral'
+        case -1: return undefined
+        default: return this.currentGesture.event
+      }
+    },
+    currentEventName: function () {
+      return this.currentGesture === undefined
+        ? undefined
+        : this.currentGesture.name
+    },
+    currentInstruction: function () {
+      if (this.state === 'training') {
+        switch (this.currentGestureIndex) {
+          case -2: return this.neutralTrainingPrompt
+          case -1: return undefined
+          default: return this.currentGesture.trainingPrompt
+        }
+      } else if (this.state === 'testing') {
+        switch (this.currentGestureIndex) {
+          case -2: return this.neutralVerificationPrompt
+          case -1: return undefined
+          default: return this.currentGesture.verificationPrompt
+        }
+      }
+      return undefined
     }
   },
   mounted: async function () {
@@ -132,7 +184,7 @@ export default {
     this.$refs.video.srcObject = stream
     this.$refs.video.play()
     this.animationFrameId = requestAnimationFrame(this.animate)
-    this.intervalId = setInterval(this.updateState, 2000)
+    this.updateState()
   },
   data: function () {
     return {
@@ -140,6 +192,7 @@ export default {
       // can be "training", "testing" or "predicting"
       state: 'training',
       preparing: false,
+      // -1 indicates nothing, -2 indicates neutral
       currentGestureIndex: -1,
       prediction: null
     }
@@ -167,8 +220,9 @@ export default {
     },
     trainFrame (image) {
       if (this.currentGestureIndex !== -1 && !this.preparing) {
+        const classIndex = this.classIndexFromGestureIndex(this.currentGestureIndex)
         const logits = this.mobilenet.infer(image, 'conv_preds')
-        this.knn.addExample(logits, this.currentGestureIndex)
+        this.knn.addExample(logits, classIndex)
         logits.dispose()
       }
     },
@@ -176,42 +230,113 @@ export default {
       if (this.currentGestureIndex !== -1) {
         const logits = this.mobilenet.infer(image, 'conv_preds')
         const res = await this.knn.predictClass(logits, TOPK)
-        console.log('testing: predicting that current gesture is index ' + res.classIndex + ' with confidence ' + (res.confidences[res.classIndex] * 100) + '%')
+        const gestureIndex = this.gestureIndexFromClassIndex(res.classIndex)
+        console.log('testing: predicting that current gesture is index ' + gestureIndex + ' with confidence ' + (res.confidences[res.classIndex] * 100) + '%')
         logits.dispose()
       }
     },
     async predictFrame (image) {
       const logits = this.mobilenet.infer(image, 'conv_preds')
       const res = await this.knn.predictClass(logits, TOPK)
-      // console.log('testing: predicting that current gesture is index ' + res.classIndex + ' with confidence ' + (res.confidences[res.classIndex] * 100) + '%')
-      this.prediction = this.computedGestures[res.classIndex]
-      this.$emit(this.prediction.event)
+      const gestureIndex = this.gestureIndexFromClassIndex(res.classIndex)
+      if (gestureIndex === -2) {
+        this.$emit('neutral')
+      } else {
+        this.prediction = this.computedGestures[gestureIndex]
+        this.$emit(this.prediction.event)
+      }
       logits.dispose()
     },
     updateState () {
       if (this.preparing) {
         this.preparing = false
+        this.scheduleUpdateState()
         return
       }
-      if (this.currentGestureIndex < this.computedGestures.length - 1) {
-        this.currentGestureIndex++
+      // Go to neutral in current cycle if necessary
+      const doneLastGesture = this.currentGestureIndex === this.computedGestures.length - 1
+      if ((this.currentGestureIndex === -1 && !this.trainNeutralLast) ||
+        (doneLastGesture && this.trainNeutralLast)) {
+        this.currentGestureIndex = -2 // neutral
         this.preparing = true
-      } else {
-        // this.currentGestureIndex = 0
+        this.scheduleUpdateState()
+        return
+      }
+
+      // Move state up one
+      if ((this.currentGestureIndex === -2 && this.trainNeutralLast) ||
+        doneLastGesture) {
         if (this.state === 'training') {
-          this.state = 'predicting'
+          this.state = 'testing'
+          this.currentGestureIndex = !this.trainNeutralLast ? -2 : 0
+          this.preparing = true
         } else {
           this.state = 'predicting'
-          clearInterval(this.intervalId)
+          this.currentGestureIndex = -1
         }
+        this.scheduleUpdateState()
+        return
       }
+      // Otherwise move gesture up one
+      this.currentGestureIndex = this.currentGestureIndex === -2
+        ? 0
+        : this.currentGestureIndex + 1
+      this.preparing = true
+      this.scheduleUpdateState()
+    },
+    scheduleUpdateState () {
+      let millisecondsToWait
+      if (this.state === 'training') {
+        if (this.currentGestureIndex === -2) {
+          millisecondsToWait = this.preparing
+            ? this.trainingDelay
+            : this.trainingTime
+        } else if (this.currentGestureIndex > -1) {
+          millisecondsToWait = this.preparing
+            ? this.currentGesture.trainingDelay
+            : this.currentGesture.trainingTime
+        } else {
+          return
+        }
+      } else if (this.state === 'testing') {
+        if (this.currentGestureIndex === -2) {
+          millisecondsToWait = this.preparing
+            ? this.verificationDelay
+            : this.verificationTime
+        } else if (this.currentGestureIndex > -1) {
+          millisecondsToWait = this.preparing
+            ? this.currentGesture.verificationDelay
+            : this.verificationTime
+        } else {
+          return
+        }
+      } else {
+        return
+      }
+      this.updateStateTimeoutId = setTimeout(this.updateState, millisecondsToWait)
     },
     reset () {
       this.knn.clearAllClasses()
       this.state = 'training'
-      this.preparing = true
-      this.currentGestureIndex = 0
-      this.intervalId = setInterval(this.updateState, 2000)
+      this.preparing = false
+      this.currentGestureIndex = -1
+      clearTimeout(this.updateStateTimeoutId)
+      this.updateState()
+    },
+    // Class indexes must be in order of training!
+    classIndexFromGestureIndex (gestureIndex) {
+      if (this.trainNeutralLast) {
+        return gestureIndex === -2 ? this.computedGestures.length : gestureIndex
+      } else {
+        return gestureIndex === -2 ? 0 : gestureIndex + 1
+      }
+    },
+    gestureIndexFromClassIndex (classIndex) {
+      if (this.trainNeutralLast) {
+        return classIndex === this.computedGestures.length ? -2 : classIndex
+      } else {
+        return classIndex === 0 ? -2 : classIndex - 1
+      }
     }
   }
 }
