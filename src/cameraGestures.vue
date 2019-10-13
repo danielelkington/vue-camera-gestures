@@ -29,8 +29,6 @@
     >
       <p v-show="currentInstruction">{{currentInstruction}}</p>
     </slot>
-
-    <button @click="reset">Reset</button>
   </div>
 </template>
 
