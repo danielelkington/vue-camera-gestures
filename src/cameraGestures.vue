@@ -209,7 +209,10 @@ export default {
       prediction: null,
       timeStartedWaiting: null,
       timeToFinishWaiting: null,
-      progress: 0
+      progress: 0,
+      gestureVerifyingCorrectSamples: 0,
+      gestureVerifyingIncorrectSamples: 0,
+      verifyingRetried: false
     }
   },
   methods: {
@@ -242,11 +245,15 @@ export default {
       }
     },
     async testFrame (image) {
-      if (this.currentGestureIndex !== -1) {
+      if (this.currentGestureIndex !== -1 && !this.preparing) {
         const logits = this.mobilenet.infer(image, 'conv_preds')
         const res = await this.knn.predictClass(logits, TOPK)
         const gestureIndex = this.gestureIndexFromClassIndex(res.classIndex)
-        console.log('testing: predicting that current gesture is index ' + gestureIndex + ' with confidence ' + (res.confidences[res.classIndex] * 100) + '%')
+        if (gestureIndex === this.currentGestureIndex) {
+          this.gestureVerifyingCorrectSamples++
+        } else {
+          this.gestureVerifyingIncorrectSamples++
+        }
         logits.dispose()
       }
     },
@@ -269,6 +276,30 @@ export default {
         requestAnimationFrame(this.updateProgress)
         return
       }
+
+      // If testing, retry if necessary
+      if (this.state === 'testing') {
+        const accuracy = (this.gestureVerifyingCorrectSamples + 0.0) * 100 / (this.gestureVerifyingCorrectSamples + this.gestureVerifyingIncorrectSamples)
+        const requiredAccuracy = this.currentGestureIndex === -2
+          ? this.requiredAccuracy
+          : this.currentGesture.requiredAccuracy
+        if (accuracy < requiredAccuracy) {
+          if (this.verifyingRetried) {
+            // Go back to start
+            this.reset()
+            return
+          } else {
+            this.verifyingRetried = true
+            this.preparing = true
+            this.gestureVerifyingIncorrectSamples = this.gestureVerifyingCorrectSamples = 0
+            this.scheduleUpdateState()
+            return
+          }
+        }
+        this.verifyingRetried = false
+        this.gestureVerifyingIncorrectSamples = this.gestureVerifyingCorrectSamples = 0
+      }
+
       // Go to neutral in current cycle if necessary
       const doneLastGesture = this.currentGestureIndex === this.computedGestures.length - 1
       if ((this.currentGestureIndex === -1 && !this.trainNeutralLast) ||
@@ -381,7 +412,8 @@ video {
 }
 .progress-bar {
   height: 5px;
-  background: black;
+  background: #41b883;
+  border-radius: 5px 0 0 5px;
 }
 .progress-bar.invisible {
   background: none;
