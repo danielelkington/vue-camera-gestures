@@ -143,7 +143,7 @@ export default {
           trainingDelay: x.trainingDelay === undefined ? this.trainingDelay : x.trainingDelay,
           trainingPrompt: x.trainingPrompt === undefined ? this.trainingPromptPrefix + name : x.trainingPrompt,
           trainingTime: x.trainingTime === undefined ? this.trainingTime : x.trainingTime,
-          verificationDelay: x.verificationPromptPrefix === undefined ? this.verificationPromptPrefix : x.verificationPromptPrefix,
+          verificationDelay: x.verificationDelay === undefined ? this.verificationDelay : x.verificationDelay,
           verificationPrompt: x.verificationPrompt === undefined ? this.verificationPromptPrefix + name : x.verificationPrompt,
           verificationTime: x.verificationTime === undefined ? this.verificationTime : x.verificationTime
         }
@@ -402,6 +402,7 @@ export default {
       this.state = 'training'
       this.preparing = false
       this.currentGestureIndex = -1
+      this.verifyingRetried = false
       clearTimeout(this.updateStateTimeoutId)
       this.updateState()
     },
