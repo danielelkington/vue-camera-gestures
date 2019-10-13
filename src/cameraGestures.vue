@@ -64,8 +64,8 @@ export default {
       default: 90
     },
     throttleEvents: {
-      type: Boolean,
-      default: false
+      type: Number,
+      default: 0
     },
     trainingDelay: {
       type: Number,
@@ -206,13 +206,14 @@ export default {
       preparing: false,
       // -1 indicates nothing, -2 indicates neutral
       currentGestureIndex: -1,
-      prediction: null,
       timeStartedWaiting: null,
       timeToFinishWaiting: null,
       progress: 0,
       gestureVerifyingCorrectSamples: 0,
       gestureVerifyingIncorrectSamples: 0,
-      verifyingRetried: false
+      verifyingRetried: false,
+      lastGestureIndexDetected: -1,
+      lastGestureDetectedTime: null
     }
   },
   methods: {
@@ -261,11 +262,31 @@ export default {
       const logits = this.mobilenet.infer(image, 'conv_preds')
       const res = await this.knn.predictClass(logits, TOPK)
       const gestureIndex = this.gestureIndexFromClassIndex(res.classIndex)
-      if (gestureIndex === -2) {
-        this.$emit('neutral')
-      } else {
-        this.prediction = this.computedGestures[gestureIndex]
-        this.$emit(this.prediction.event)
+      const neutralDetected = gestureIndex === -2
+      const gesture = neutralDetected
+        ? undefined
+        : this.computedGestures[gestureIndex]
+      const event = neutralDetected ? 'neutral' : this.computedGestures[gestureIndex].event
+      const fireOnce = neutralDetected ? this.fireOnce : gesture.fireOnce
+      const throttleEvent = neutralDetected ? this.throttleEvents : gesture.throttleEvent
+
+      const lastGestureIndex = this.lastGestureIndexDetected
+      this.lastGestureIndexDetected = gestureIndex
+
+      if (gestureIndex !== lastGestureIndex) {
+        this.$emit(event)
+        this.lastGestureDetectedTime = new Date().getTime()
+      } else if (!fireOnce) {
+        if (throttleEvent > 0) {
+          const time = new Date().getTime()
+          if (time - this.lastGestureDetectedTime >= throttleEvent) {
+            this.$emit(event)
+            this.lastGestureDetectedTime = time
+          }
+        } else {
+          // event is to be fired every frame it is detected
+          this.$emit(event)
+        }
       }
       logits.dispose()
     },

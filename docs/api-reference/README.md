@@ -12,7 +12,7 @@
 | __showCameraFeed AfterTrainingCycle__ | `Boolean` | `true` | Whether the camera feed will be displayed after the training cycle has finished.|
 | __showCameraFeed DuringTraining__ | `Boolean` | `true` | Whether the camera feed will be displayed while training gestures.|
 | __showCameraFeed DuringVerification__ | `Boolean` | `true` | Whether the camera feed will be displayed while verifying gestures.|
-| __throttleEvents__ | `Boolean` | `false` | Only has an effect if `fireOnce` is false. Throttles how often an event gets fired if the user persists with a gesture.|
+| __throttleEvents__ | `Number` | `0` | Only has an effect if `fireOnce` is false. Throttles how often an event gets fired (in milliseconds) if the user persists with a gesture. If 0, the event will be fired each frame the user continues persisting with the gesture.|
 | __trainingDelay__ | `Number` | `1000` | The number of milliseconds to wait after first displaying a prompt to train a gesture before the training of that gesture commences. Should be high enough to give the user time to start doing that gesture.|
 | __trainingTime__ | `Number` | `3000` | The number of milliseconds to spend taking snapshots from the camera feed and using them to train a model for a gesture.|
 | __trainNeutralLast__ | `Boolean` | `false` | By default, the neutral gesture is trained and verified first. If this prop is true, it will be trained and verified last.|
@@ -28,7 +28,7 @@ The gestures prop is an array of objects for each gesture. Each object can have 
 | __fireOnce__ | `Boolean`| If true, an event will be fired when a user makes the gesture, but will not be fired again until either a different gesture is detected, or the user first returns to the neutral position.|
 | __name__ | `String`| The name of the gesture shown in prompts.|
 | __requiredAccuracy__ | `Number`| A number between 0 and 100. The gesture must have at least this percent accuracy during verification, otherwise the training cycle will repeat.|
-| __throttleEvent__ | `Number`| Only has an effect if `fireOnce` is false (on this object or in a separate prop). Throttles how often the event gets fired if the user persists with the gesture.|
+| __throttleEvent__ | `Number`| Only has an effect if `fireOnce` is false (on this object or in a prop). Throttles how often an event gets fired (in milliseconds) if the user persists with this gesture. If 0, the event will be fired each frame the user continues persisting with the gesture.|
 | __trainingDelay__ | `Number`| How many milliseconds to spend showing the user the prompt before starting to train the gesture.|
 | __trainingPrompt__ | `String`| The prompt displayed before and while this gesture is being trained.|
 | __trainingTime__ | `Number`| How many milliseconds to spend training the gesture.|
