@@ -52,3 +52,7 @@ If the `gestures` prop is not provided, gestures will be determined based on any
 | -------- | ---- | ------------- |
 | __progress__ |See the [guide](../guide/#customizing-the-progress-bar)| Customizes the appearance of the progress bar|
 | __instructions__ |See the [guide](../guide/#customizing-the-instructions)| Customizes the appearance of the instructions|
+
+<ClientOnly>
+  <load-mobile-net></load-mobile-net>
+</ClientOnly>

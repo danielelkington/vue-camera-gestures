@@ -1,5 +1,21 @@
 <template>
   <div>
+    <slot
+      name="loading"
+      :loading="busyLoadingMobilenet"
+    >
+      <div
+        class="loader-container"
+        v-if="busyLoadingMobilenet"
+      >
+        <div class="lds-ring">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+    </slot>
     <video
       ref="video"
       autoplay
@@ -7,7 +23,7 @@
       width="227"
       @playing="videoPlaying = true"
       @pause="videoPlaying = false"
-      v-show="showCameraFeed"
+      v-show="!busyLoadingMobilenet && showCameraFeed"
     ></video>
     <slot
       name="progress"
@@ -34,7 +50,7 @@
 
 <script>
 // Heavily inspired by Charlie Gerard's teachable-keyboard https://github.com/charliegerard/teachable-keyboard
-import { load as loadMobilenetModule } from '@tensorflow-models/mobilenet'
+import loadMobilenet from './loadMobilenet'
 import { browser as tfBrowser, tensor } from '@tensorflow/tfjs'
 import { create as createKnnClassifier } from '@tensorflow-models/knn-classifier'
 // K value for KNN
@@ -213,12 +229,13 @@ export default {
   },
   mounted: async function () {
     this.knn = createKnnClassifier()
-    this.mobilenet = await loadMobilenetModule()
-    const stream = await navigator.mediaDevices.getUserMedia({
+    this.mobilenet = await loadMobilenet()
+    this.busyLoadingMobilenet = false
+    this.mediaStream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: false
     })
-    this.$refs.video.srcObject = stream
+    this.$refs.video.srcObject = this.mediaStream
     this.$refs.video.play()
     this.animationFrameId = requestAnimationFrame(this.animate)
     this.updateState()
@@ -226,6 +243,7 @@ export default {
   data: function () {
     return {
       videoPlaying: false,
+      busyLoadingMobilenet: true,
       // can be "training", "testing" or "predicting"
       state: 'training',
       preparing: false,
@@ -480,7 +498,12 @@ export default {
     }
   },
   destroyed: function () {
-    this.knn.dispose()
+    if (this.knn) {
+      this.knn.dispose()
+    }
+    if (this.mediaStream) {
+      this.mediaStream.getTracks().forEach(x => x.stop())
+    }
   }
 }
 </script>
@@ -499,5 +522,48 @@ video {
 }
 .progress-bar.invisible {
   background: none;
+}
+
+.loader-container {
+  width: 227px;
+  height: 100px;
+}
+/* Loader CSS from https://loading.io/css/ */
+.lds-ring {
+  display: block;
+  position: relative;
+  left: calc(50% - 32px);
+  top: calc(50% - 32px);
+  width: 64px;
+  height: 64px;
+}
+.lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 51px;
+  height: 51px;
+  margin: 6px;
+  border: 6px solid #41b883;
+  border-radius: 50%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: #41b883 transparent transparent transparent;
+}
+.lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+.lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

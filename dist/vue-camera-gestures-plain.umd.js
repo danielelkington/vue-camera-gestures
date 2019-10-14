@@ -8,6 +8,24 @@
                         typeof self !== "undefined" ? self :
                         typeof window !== "undefined" ? window : {});
 
+            async function loadMobilenet () {
+              if (window.vueCameraGestures_loadMobilenetPromise) {
+                await window.vueCameraGestures_loadMobilenetPromise;
+                return window.vueCameraGestures_mobilenet
+              }
+              if (window.vueCameraGestures_mobilenet) {
+                return window.vueCameraGestures_mobilenet
+              }
+              window.vueCameraGestures_loadMobilenetPromise = mobilenet.load()
+                .then(function (x) { window.vueCameraGestures_mobilenet = x; })
+                .catch(function (x) {
+                  window.vueCameraGestures_loadMobilenetPromise = undefined;
+                  throw x
+                });
+              await window.vueCameraGestures_loadMobilenetPromise;
+              return window.vueCameraGestures_mobilenet
+            }
+
             //
             // K value for KNN
             var TOPK = 10;
@@ -187,12 +205,13 @@
               },
               mounted: async function () {
                 this.knn = knnClassifier.create();
-                this.mobilenet = await mobilenet.load();
-                var stream = await navigator.mediaDevices.getUserMedia({
+                this.mobilenet = await loadMobilenet();
+                this.busyLoadingMobilenet = false;
+                this.mediaStream = await navigator.mediaDevices.getUserMedia({
                   video: true,
                   audio: false
                 });
-                this.$refs.video.srcObject = stream;
+                this.$refs.video.srcObject = this.mediaStream;
                 this.$refs.video.play();
                 this.animationFrameId = requestAnimationFrame(this.animate);
                 this.updateState();
@@ -200,6 +219,7 @@
               data: function () {
                 return {
                   videoPlaying: false,
+                  busyLoadingMobilenet: true,
                   // can be "training", "testing" or "predicting"
                   state: 'training',
                   preparing: false,
@@ -454,7 +474,12 @@
                 }
               },
               destroyed: function () {
-                this.knn.dispose();
+                if (this.knn) {
+                  this.knn.dispose();
+                }
+                if (this.mediaStream) {
+                  this.mediaStream.getTracks().forEach(function (x) { return x.stop(); });
+                }
               }
             };
 
@@ -602,17 +627,17 @@
             var __vue_script__ = script;
 
             /* template */
-            var __vue_render__ = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('video',{directives:[{name:"show",rawName:"v-show",value:(_vm.showCameraFeed),expression:"showCameraFeed"}],ref:"video",attrs:{"autoplay":"","playsinline":"","width":"227"},on:{"playing":function($event){_vm.videoPlaying = true;},"pause":function($event){_vm.videoPlaying = false;}}}),_vm._v(" "),_vm._t("progress",[_c('div',{staticClass:"progress-bar",class:{invisible: !_vm.showProgressBar},style:({width: (_vm.progress * 227.0) + 'px'})})],{"inProgress":_vm.showProgressBar,"progress":_vm.progress}),_vm._v(" "),_vm._t("instructions",[_c('p',{directives:[{name:"show",rawName:"v-show",value:(_vm.currentInstruction),expression:"currentInstruction"}]},[_vm._v(_vm._s(_vm.currentInstruction))])],{"training":_vm.state === 'training',"verifying":_vm.state === 'testing',"event":_vm.currentEvent,"eventName":_vm.currentEventName})],2)};
-            var __vue_staticRenderFns__ = [];
+            var __vue_render__ = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_vm._t("loading",[(_vm.busyLoadingMobilenet)?_c('div',{staticClass:"loader-container"},[_vm._m(0)]):_vm._e()],{"loading":_vm.busyLoadingMobilenet}),_vm._v(" "),_c('video',{directives:[{name:"show",rawName:"v-show",value:(!_vm.busyLoadingMobilenet && _vm.showCameraFeed),expression:"!busyLoadingMobilenet && showCameraFeed"}],ref:"video",attrs:{"autoplay":"","playsinline":"","width":"227"},on:{"playing":function($event){_vm.videoPlaying = true;},"pause":function($event){_vm.videoPlaying = false;}}}),_vm._v(" "),_vm._t("progress",[_c('div',{staticClass:"progress-bar",class:{invisible: !_vm.showProgressBar},style:({width: (_vm.progress * 227.0) + 'px'})})],{"inProgress":_vm.showProgressBar,"progress":_vm.progress}),_vm._v(" "),_vm._t("instructions",[_c('p',{directives:[{name:"show",rawName:"v-show",value:(_vm.currentInstruction),expression:"currentInstruction"}]},[_vm._v(_vm._s(_vm.currentInstruction))])],{"training":_vm.state === 'training',"verifying":_vm.state === 'testing',"event":_vm.currentEvent,"eventName":_vm.currentEventName})],2)};
+            var __vue_staticRenderFns__ = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"lds-ring"},[_c('div'),_vm._v(" "),_c('div'),_vm._v(" "),_c('div'),_vm._v(" "),_c('div')])}];
 
               /* style */
               var __vue_inject_styles__ = function (inject) {
                 if (!inject) { return }
-                inject("data-v-501ef6ce_0", { source: "video[data-v-501ef6ce]{transform:rotateY(180deg);-webkit-transform:rotateY(180deg);-moz-transform:rotateY(180deg)}.progress-bar[data-v-501ef6ce]{height:5px;background:#41b883;border-radius:5px 0 0 5px}.progress-bar.invisible[data-v-501ef6ce]{background:0 0}", map: undefined, media: undefined });
+                inject("data-v-69af2229_0", { source: "video[data-v-69af2229]{transform:rotateY(180deg);-webkit-transform:rotateY(180deg);-moz-transform:rotateY(180deg)}.progress-bar[data-v-69af2229]{height:5px;background:#41b883;border-radius:5px 0 0 5px}.progress-bar.invisible[data-v-69af2229]{background:0 0}.loader-container[data-v-69af2229]{width:227px;height:100px}.lds-ring[data-v-69af2229]{display:block;position:relative;left:calc(50% - 32px);top:calc(50% - 32px);width:64px;height:64px}.lds-ring div[data-v-69af2229]{box-sizing:border-box;display:block;position:absolute;width:51px;height:51px;margin:6px;border:6px solid #41b883;border-radius:50%;animation:lds-ring-data-v-69af2229 1.2s cubic-bezier(.5,0,.5,1) infinite;border-color:#41b883 transparent transparent transparent}.lds-ring div[data-v-69af2229]:nth-child(1){animation-delay:-.45s}.lds-ring div[data-v-69af2229]:nth-child(2){animation-delay:-.3s}.lds-ring div[data-v-69af2229]:nth-child(3){animation-delay:-.15s}@keyframes lds-ring-data-v-69af2229{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}", map: undefined, media: undefined });
 
               };
               /* scoped */
-              var __vue_scope_id__ = "data-v-501ef6ce";
+              var __vue_scope_id__ = "data-v-69af2229";
               /* module identifier */
               var __vue_module_identifier__ = undefined;
               /* functional template */
@@ -657,6 +682,7 @@
 
             exports.default = cameraGestures;
             exports.install = install;
+            exports.loadMobilenet = loadMobilenet;
 
             Object.defineProperty(exports, '__esModule', { value: true });
 
