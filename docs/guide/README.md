@@ -1,4 +1,4 @@
-# Guide 
+# Guide
 Vue Camera Gestures is a component that when placed on a page will
 - Request access to the user's camera
 - Prompt the user to train a number of configurable gestures
@@ -234,6 +234,16 @@ The displayed instructions can be customized using the `instructions` slot. The 
   </template>
 </camera-gestures>
 ```
+
+### Customizing the initial loading indicator
+The initial loading indicator that is displayed while the Mobilenet model is loading can be customized using the `loading` slot. The slot props object contains a single property: `loading`.
+```html
+<camera-gestures @left="left()" @right="right()">
+  <template v-slot:loading="{loading}">
+    <my-fancy-spinner v-if="loading"></my-fancy-spinner>
+  </template>
+</camera-gestures>
+```
 ## Training
 By default, the component will begin training as soon as it is rendered onto the page and is given camera permission. It has the following behaviour by default:
 1. Prompt the user to make a neutral position, and after one second delay, displays a progress bar for three seconds while it trains the neutral position based on the camera input.
@@ -312,6 +322,12 @@ This can also be customized per gesture.
   @right="right()">
 </camera-gestures>
 ```
+## Improving the initial load time
+When the component is first rendered it will load the mobilenet Tensorflow pre-trained model, which is quite large (20MB +). It may be quicker to load this earlier, before the user gets to the component. This can be done as follows:
+```js
+import { loadMobilenet } from 'vue-camera-gestures'
+loadMobilenet() // returns a promise that resolves when mobilenet is loaded
+```
 ## Saving the generated model
 ::: warning
 This feature is very experimental and probably isn't going to work very well yet.
@@ -357,3 +373,6 @@ export default {
 }
 </script>
 ```
+<ClientOnly>
+  <load-mobile-net></load-mobile-net>
+</ClientOnly>

@@ -14,3 +14,6 @@ features:
   details: Let users who have difficulty using a keyboard or mouse control your application, or just provide a more interesting experience for your user.
 footer: MIT Licensed | Copyright © 2019-present Daniel Elkington
 ---
+<ClientOnly>
+  <load-mobile-net></load-mobile-net>
+</ClientOnly>

@@ -50,5 +50,10 @@ If the `gestures` prop is not provided, gestures will be determined based on any
 ## Slots
 |Slot | Slot Props | Description|
 | -------- | ---- | ------------- |
-| __progress__ |See the [guide](../guide/#customizing-the-progress-bar)| Customizes the appearance of the progress bar|
 | __instructions__ |See the [guide](../guide/#customizing-the-instructions)| Customizes the appearance of the instructions|
+| __loading__ |See the [guide](../guide/#customizing-the-initial-loading-indicator)| Customizes the appearance of the loading indicator that initially appears while the Mobilenet model is loading|
+| __progress__ |See the [guide](../guide/#customizing-the-progress-bar)| Customizes the appearance of the progress bar|
+
+<ClientOnly>
+  <load-mobile-net></load-mobile-net>
+</ClientOnly>

@@ -1,4 +1,5 @@
 import cameraGestures from './cameraGestures.vue';
+import loadMobilenet from './loadMobilenet'
 
 // Declare install function executed by Vue.use()
 export function install(Vue) {
@@ -23,4 +24,5 @@ if (GlobalVue) {
   GlobalVue.use(plugin);
 }
 
+export {loadMobilenet}
 export default cameraGestures;
