@@ -1,6 +1,6 @@
 {
   "name": "vue-camera-gestures",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Let users control your Vue app using AI and their camera in just 1 line of HTML!",
   "main": "dist/vue-camera-gestures.umd.js",
   "module": "dist/vue-camera-gestures.esm.js",
@@ -36,9 +36,9 @@
   },
   "homepage": "https://github.com/danielelkington/vue-camera-gestures#readme",
   "devDependencies": {
-    "@tensorflow/tfjs": "^1.2.9",
     "@tensorflow-models/knn-classifier": "^1.2.1",
     "@tensorflow-models/mobilenet": "^2.0.4",
+    "@tensorflow/tfjs": "^1.2.9",
     "rollup": "^1.21.2",
     "rollup-plugin-buble": "^0.19.2",
     "rollup-plugin-commonjs": "^10.1.0",
@@ -50,8 +50,11 @@
     "vuepress": "^1.1.0"
   },
   "peerDependencies": {
-    "@tensorflow/tfjs": "^1.2.9",
     "@tensorflow-models/knn-classifier": "^1.2.1",
-    "@tensorflow-models/mobilenet": "^2.0.4"
+    "@tensorflow-models/mobilenet": "^2.0.4",
+    "@tensorflow/tfjs": "^1.2.9"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.0"
   }
 }
