@@ -1,14 +1,14 @@
 <template>
-  <div>
+  <div class="camera-gestures-container">
     <slot
       name="loading"
       :loading="busyLoadingMobilenet"
     >
       <div
-        class="loader-container"
+        class="camera-gestures-loader-container"
         v-if="busyLoadingMobilenet"
       >
-        <div class="lds-ring">
+        <div class="camera-gestures-lds-ring">
           <div></div>
           <div></div>
           <div></div>
@@ -20,10 +20,10 @@
       ref="video"
       autoplay
       playsinline
-      width="227"
       @playing="videoPlaying = true"
       @pause="videoPlaying = false"
       v-show="!busyLoadingMobilenet && showCameraFeed"
+      class="camera-gestures-camera-feed"
     ></video>
     <slot
       name="progress"
@@ -33,7 +33,7 @@
       <div
         :style="{width: (progress * 227.0) + 'px'}"
         :class="{invisible: !showProgressBar}"
-        class="progress-bar"
+        class="camera-gestures-progress-bar"
       ></div>
     </slot>
     <slot
@@ -43,7 +43,10 @@
       :event="currentEvent"
       :eventName="currentEventName"
     >
-      <p v-show="currentInstruction">{{currentInstruction}}</p>
+      <p
+        class="camera-gestures-instructions"
+        v-show="currentInstruction"
+      >{{currentInstruction}}</p>
     </slot>
   </div>
 </template>
@@ -142,7 +145,7 @@ export default {
         const filteredEventNames = Object.keys(this.$listeners).filter(x => !reservedEventNames.includes(x.toUpperCase()))
         return filteredEventNames.map(x => {
           // convert event name from camelCase to Sentence Case
-          let name = x.replace(/(A-Z)/g, ' $1')
+          let name = x.replace(/([A-Z])/g, ' $1')
           name = name.charAt(0).toUpperCase() + name.slice(1)
           return {
             event: x,
@@ -165,7 +168,7 @@ export default {
         if (x.name) {
           name = x.name
         } else {
-          name = x.event.replace(/(A-Z)/g, ' $1')
+          name = x.event.replace(/([A-Z])/g, ' $1')
           name = name.charAt(0).toUpperCase() + name.slice(1)
         }
         return {
@@ -509,27 +512,35 @@ export default {
 </script>
 
 <style scoped>
+.camera-gestures-container {
+  width: 227px;
+}
 /* Mirror the video */
-video {
+video.camera-gestures-camera-feed {
   transform: rotateY(180deg);
   -webkit-transform: rotateY(180deg); /* Safari and Chrome */
   -moz-transform: rotateY(180deg); /* Firefox */
+  width: 227px;
+  max-width: 100%;
 }
-.progress-bar {
+.camera-gestures-progress-bar {
   height: 5px;
   background: #41b883;
   border-radius: 5px 0 0 5px;
 }
-.progress-bar.invisible {
+.camera-gestures-progress-bar.invisible {
   background: none;
 }
+.camera-gestures-instructions {
+  text-align: center;
+}
 
-.loader-container {
+.camera-gestures-loader-container {
   width: 227px;
   height: 100px;
 }
 /* Loader CSS from https://loading.io/css/ */
-.lds-ring {
+.camera-gestures-lds-ring {
   display: block;
   position: relative;
   left: calc(50% - 32px);
@@ -537,7 +548,7 @@ video {
   width: 64px;
   height: 64px;
 }
-.lds-ring div {
+.camera-gestures-lds-ring div {
   box-sizing: border-box;
   display: block;
   position: absolute;
@@ -546,19 +557,19 @@ video {
   margin: 6px;
   border: 6px solid #41b883;
   border-radius: 50%;
-  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  animation: camera-gestures-lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
   border-color: #41b883 transparent transparent transparent;
 }
-.lds-ring div:nth-child(1) {
+.camera-gestures-lds-ring div:nth-child(1) {
   animation-delay: -0.45s;
 }
-.lds-ring div:nth-child(2) {
+.camera-gestures-lds-ring div:nth-child(2) {
   animation-delay: -0.3s;
 }
-.lds-ring div:nth-child(3) {
+.camera-gestures-lds-ring div:nth-child(3) {
   animation-delay: -0.15s;
 }
-@keyframes lds-ring {
+@keyframes camera-gestures-lds-ring {
   0% {
     transform: rotate(0deg);
   }

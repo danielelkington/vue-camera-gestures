@@ -45,14 +45,14 @@ npm i vue-camera-gestures --save
 ```
 Register the component globally
 ```js
-import { CameraGestures } from 'vue-camera-gestures'
+import CameraGestures from 'vue-camera-gestures'
 
 Vue.component('camera-gestures', CameraGestures)
 ```
 Or register it in a Single File Component
 ```html
 <script>
-import { CameraGestures } from 'vue-camera-gestures'
+import CameraGestures from 'vue-camera-gestures'
 
 export default {
   components: {
@@ -61,54 +61,18 @@ export default {
 }
 </script>
 ```
-You can ignore the peer dependency warning as the Tensorflow JS libraries are bundled with the component.
+You can ignore the peer dependency warning as the Tensorflow JS libraries are bundled with the component. You can also [import the Vue Camera Gestures library on its own (only 5KB Gzipped!)](#installing-without-the-bundled-version-of-tensorflow).
 ### via CDN
 ```html
 <script src="https://unpkg.com/vue-camera-gestures"></script>
 ```
-## Installing without the bundled version of Tensorflow
-By default the Tensorflow JS library is bundled with the component, but this may not be the desired behaviour, such as if you are separately using Tensorflow in your project. The library can be imported without Tensorflow as follows:
-### via npm
-```bash
-npm i @tensorflow/tfjs --save
-npm i @tensorflow-models/knn-classifier --save
-npm i @tensorflow-models/mobilenet --save
-npm i vue-camera-gestures --save
-```
 
-Register the component globally
-```js
-import CameraGestures from 'vue-camera-gestures/dist/vue-camera-gestures-plain.esm.js'
-
-Vue.component('camera-gestures', CameraGestures)
-```
-Or register it in a Single File Component
-```html
-<script>
-import CameraGestures from 'vue-camera-gestures/dist/vue-camera-gestures-plain.esm.js'
-
-export default {
-  components: {
-    CameraGestures
-  }
-}
-</script>
-```
-
-### via CDN
-```html
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
-<script src="https://unpkg.com/vue-camera-gestures/dist/vue-camera-gestures-plain.min.js"></script>
-```
-
-# Getting Started
-The simplest way to specify both the gestures to be trained and to subscribe to events is to simply subscribe to an event with a name of your choice. Please note that there are a number of reserved event names.
+## Getting Started
+The simplest way to specify both the gestures to be trained and to subscribe to events is to simply subscribe to an event with a name of your choice. Please note that there are a number of [reserved event names](../api-reference/#events).
 ```html
 <camera-gestures @fancyGesture="doSomething()"></camera-gestures>
 ```
-Event names in pascal case or with hyphens will be split into separate capitalized words.
+Event names in camelCase will be split into separate capitalized words.
 - When the gestures is being trained the user will see the prompt `Perform a gesture: Fancy Gesture`
 - When the AI model is being tested, the user will see the prompt `Verify gesture: Fancy Gesture`
 ## Customizing prompts
@@ -322,8 +286,59 @@ This can also be customized per gesture.
   @right="right()">
 </camera-gestures>
 ```
+# Library size
+Vue Camera Gestures, which comes bundled with three Tensorflow libraries, is **230KB minified + Gzipped**. If you do not want this contributing to your application's entry-point, you should code-split the library into a separate chunk, which is [trivial if using WebPack](https://vuejs.org/v2/guide/components-dynamic-async.html#Async-Components). For example, in a Single File Component:
+```html
+<script>
+export default {
+  components: {
+    // Only load the vue-camera-gestures library when we 
+    // first try to render it
+    'camera-gestures': () => import('vue-camera-gestures')
+  }
+}
+</script>
+```
+In addition to the library size, at run-time the library loads the Mobilenet AI model, which is around 17MB. 
+
+## Installing without the bundled version of Tensorflow
+By default the Tensorflow JS library is bundled with the component, but this may not be the desired behaviour, such as if you are separately using Tensorflow in your project and want to avoid bundling it twice. Vue Camera Gestures is only **5KB minified + Gzipped without Tensorflow**. The library can be imported without Tensorflow as follows:
+### via npm
+```bash
+npm i @tensorflow/tfjs --save
+npm i @tensorflow-models/knn-classifier --save
+npm i @tensorflow-models/mobilenet --save
+npm i vue-camera-gestures --save
+```
+
+Register the component globally
+```js
+import CameraGestures from 'vue-camera-gestures/dist/vue-camera-gestures-plain.esm.js'
+
+Vue.component('camera-gestures', CameraGestures)
+```
+Or register it in a Single File Component
+```html
+<script>
+import CameraGestures from 'vue-camera-gestures/dist/vue-camera-gestures-plain.esm.js'
+
+export default {
+  components: {
+    CameraGestures
+  }
+}
+</script>
+```
+
+### via CDN
+```html
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
+<script src="https://unpkg.com/vue-camera-gestures/dist/vue-camera-gestures-plain.min.js"></script>
+```
 ## Improving the initial load time
-When the component is first rendered it will load the mobilenet Tensorflow pre-trained model, which is quite large (20MB +). It may be quicker to load this earlier, before the user gets to the component. This can be done as follows:
+When the component is first rendered it will load the mobilenet Tensorflow pre-trained model, which is quite large (~17MB). It may be quicker to load this earlier, before the user gets to the component. This can be done as follows:
 ```js
 import { loadMobilenet } from 'vue-camera-gestures'
 loadMobilenet() // returns a promise that resolves when mobilenet is loaded

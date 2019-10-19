@@ -39,7 +39,7 @@
     "@tensorflow-models/knn-classifier": "^1.2.1",
     "@tensorflow-models/mobilenet": "^2.0.4",
     "@tensorflow/tfjs": "^1.2.9",
-    "rollup": "^1.21.2",
+    "rollup": "^1.25.0",
     "rollup-plugin-buble": "^0.19.2",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-globals": "^1.4.0",
@@ -47,7 +47,7 @@
     "rollup-plugin-vue": "^5.0.1",
     "vue": "^2.5.16",
     "vue-template-compiler": "^2.5.16",
-    "vuepress": "^1.1.0"
+    "vuepress": "^1.2.0"
   },
   "peerDependencies": {
     "@tensorflow-models/knn-classifier": "^1.2.1",
