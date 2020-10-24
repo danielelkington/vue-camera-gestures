@@ -44,17 +44,17 @@
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-vue": "^5.1.6",
-    "vue": "^2.6.11",
-    "vue-template-compiler": "^2.6.11",
-    "vuepress": "^1.3.1"
+    "rollup-plugin-vue": "^5.1.9",
+    "vue": "^2.6.12",
+    "vue-template-compiler": "^2.6.12",
+    "vuepress": "^1.7.1"
   },
   "peerDependencies": {
     "@tensorflow-models/knn-classifier": "^1.2.2",
     "@tensorflow-models/mobilenet": "^2.0.4",
-    "@tensorflow/tfjs": "^1.7.0"
+    "@tensorflow/tfjs": "^1.7.4"
   },
   "dependencies": {
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.1"
   }
 }
