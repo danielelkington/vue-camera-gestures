@@ -280,7 +280,8 @@
                 predictFrame: async function predictFrame (image) {
                   var logits = this.mobilenet.infer(image, 'conv_preds');
                   var res = await this.knn.predictClass(logits, TOPK);
-                  var gestureIndex = this.gestureIndexFromClassIndex(res.classIndex);
+                  var classIndex = parseInt(res.label);
+                  var gestureIndex = this.gestureIndexFromClassIndex(classIndex);
                   var neutralDetected = gestureIndex === -2;
                   var gesture = neutralDetected
                     ? undefined
@@ -310,6 +311,8 @@
                   logits.dispose();
                 },
                 updateState: function updateState () {
+                  var this$1 = this;
+
                   // Model provided - skip everything and just use the given model
                   if (this.model) {
                     this.loadModelFromJson(this.model);
@@ -333,7 +336,7 @@
                     if (accuracy < requiredAccuracy) {
                       if (this.verifyingRetried) {
                         // Go back to start
-                        this.$emit('verificationFailed', this.getModelJson());
+                        this.getModelJson().then(function (x) { return this$1.$emit('verificationFailed', x); });
                         this.reset();
                         return
                       } else {
@@ -362,14 +365,14 @@
                   if ((this.currentGestureIndex === -2 && this.trainNeutralLast) ||
                     doneLastGesture) {
                     if (this.state === 'training' && this.doVerification) {
-                      this.$emit('doneTraining', this.getModelJson());
+                      this.getModelJson().then(function (x) { return this$1.$emit('doneTraining', x); });
                       this.state = 'testing';
                       this.currentGestureIndex = !this.trainNeutralLast ? -2 : 0;
                       this.preparing = true;
                     } else {
                       if (this.state === 'testing') {
                         // verification completed successfully!
-                        this.$emit('doneVerification', this.getModelJson());
+                        this.getModelJson().then(function (x) { return this$1.$emit('doneVerification', x); });
                       }
                       this.state = 'predicting';
                       this.currentGestureIndex = -1;
@@ -453,24 +456,28 @@
                     return classIndex === 0 ? -2 : classIndex - 1
                   }
                 },
-                getModelJson: function getModelJson () {
-                  // With thanks to https://github.com/tensorflow/tfjs/issues/633#issuecomment-456308218
+                getModelJson: async function getModelJson () {
+                  // With thanks to https://github.com/tensorflow/tfjs/issues/633#issuecomment-660642769
                   var dataset = this.knn.getClassifierDataset();
-                  var datasetObj = {};
-                  Object.keys(dataset).forEach(function (key) {
-                    var data = dataset[key].dataSync();
-                    datasetObj[key] = Array.from(data);
-                  });
-                  return JSON.stringify(datasetObj)
+                  var data = [];
+                  for (var label in dataset) {
+                    data.push({
+                      label: label,
+                      values: Array.from(await dataset[label].data()),
+                      shape: dataset[label].shape
+                    });
+                  }
+                  return JSON.stringify(data)
                 },
                 loadModelFromJson: function loadModelFromJson (json) {
-                  // With thanks to https://github.com/tensorflow/tfjs/issues/633#issuecomment-456308218
-                  var tensorObj = JSON.parse(json);
+                  // With thanks to https://github.com/tensorflow/tfjs/issues/633#issuecomment-660642769
+                  var model = JSON.parse(json);
                   // convert back to tensor
-                  Object.keys(tensorObj).forEach(function (key) {
-                    tensorObj[key] = tfjs.tensor(tensorObj[key], [tensorObj[key].length / 1000, 1000]);
+                  var dataset = {};
+                  model.forEach(function (example) {
+                    dataset[example.label] = tfjs.tensor(example.values, example.shape);
                   });
-                  this.knn.setClassifierDataset(tensorObj);
+                  this.knn.setClassifierDataset(dataset);
                 }
               },
               destroyed: function () {
@@ -621,11 +628,11 @@
               /* style */
               var __vue_inject_styles__ = function (inject) {
                 if (!inject) { return }
-                inject("data-v-1619a330_0", { source: ".camera-gestures-container[data-v-1619a330]{width:227px}video.camera-gestures-camera-feed[data-v-1619a330]{transform:rotateY(180deg);-webkit-transform:rotateY(180deg);-moz-transform:rotateY(180deg);width:227px;max-width:100%}.camera-gestures-progress-bar[data-v-1619a330]{height:5px;background:#41b883;border-radius:5px 0 0 5px}.camera-gestures-progress-bar.invisible[data-v-1619a330]{background:0 0}.camera-gestures-instructions[data-v-1619a330]{text-align:center}.camera-gestures-loader-container[data-v-1619a330]{width:227px;height:100px}.camera-gestures-lds-ring[data-v-1619a330]{display:block;position:relative;left:calc(50% - 32px);top:calc(50% - 32px);width:64px;height:64px}.camera-gestures-lds-ring div[data-v-1619a330]{box-sizing:border-box;display:block;position:absolute;width:51px;height:51px;margin:6px;border:6px solid #41b883;border-radius:50%;animation:camera-gestures-lds-ring-data-v-1619a330 1.2s cubic-bezier(.5,0,.5,1) infinite;border-color:#41b883 transparent transparent transparent}.camera-gestures-lds-ring div[data-v-1619a330]:nth-child(1){animation-delay:-.45s}.camera-gestures-lds-ring div[data-v-1619a330]:nth-child(2){animation-delay:-.3s}.camera-gestures-lds-ring div[data-v-1619a330]:nth-child(3){animation-delay:-.15s}@keyframes camera-gestures-lds-ring-data-v-1619a330{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}", map: undefined, media: undefined });
+                inject("data-v-776e4379_0", { source: ".camera-gestures-container[data-v-776e4379]{width:227px}video.camera-gestures-camera-feed[data-v-776e4379]{transform:rotateY(180deg);-webkit-transform:rotateY(180deg);-moz-transform:rotateY(180deg);width:227px;max-width:100%}.camera-gestures-progress-bar[data-v-776e4379]{height:5px;background:#41b883;border-radius:5px 0 0 5px}.camera-gestures-progress-bar.invisible[data-v-776e4379]{background:0 0}.camera-gestures-instructions[data-v-776e4379]{text-align:center}.camera-gestures-loader-container[data-v-776e4379]{width:227px;height:100px}.camera-gestures-lds-ring[data-v-776e4379]{display:block;position:relative;left:calc(50% - 32px);top:calc(50% - 32px);width:64px;height:64px}.camera-gestures-lds-ring div[data-v-776e4379]{box-sizing:border-box;display:block;position:absolute;width:51px;height:51px;margin:6px;border:6px solid #41b883;border-radius:50%;animation:camera-gestures-lds-ring-data-v-776e4379 1.2s cubic-bezier(.5,0,.5,1) infinite;border-color:#41b883 transparent transparent transparent}.camera-gestures-lds-ring div[data-v-776e4379]:nth-child(1){animation-delay:-.45s}.camera-gestures-lds-ring div[data-v-776e4379]:nth-child(2){animation-delay:-.3s}.camera-gestures-lds-ring div[data-v-776e4379]:nth-child(3){animation-delay:-.15s}@keyframes camera-gestures-lds-ring-data-v-776e4379{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}", map: undefined, media: undefined });
 
               };
               /* scoped */
-              var __vue_scope_id__ = "data-v-1619a330";
+              var __vue_scope_id__ = "data-v-776e4379";
               /* module identifier */
               var __vue_module_identifier__ = undefined;
               /* functional template */
