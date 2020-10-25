@@ -344,12 +344,9 @@ import { loadMobilenet } from 'vue-camera-gestures'
 loadMobilenet() // returns a promise that resolves when mobilenet is loaded
 ```
 ## Saving the generated model
-::: warning
-This feature is very experimental and probably isn't going to work very well yet.
-:::
 Due to differences in lighting conditions, how far the user is positioned from the camera, background noise, choice of gestures, etc, for best results it is recommended that gestures be trained each time before the user uses them.
 
-It is, however, possible to save and load models generated through training. A trained model can be retrieved by subscribing to the @doneTraining event.
+It is, however, possible to save and load models generated through training. A trained model can be retrieved by subscribing to the `@doneTraining` event.
 ```html
 <template>
   <camera-gestures @doneTraining="doneTraining"></camera-gestures>
