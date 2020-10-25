@@ -307,7 +307,8 @@ export default {
     async predictFrame (image) {
       const logits = this.mobilenet.infer(image, 'conv_preds')
       const res = await this.knn.predictClass(logits, TOPK)
-      const gestureIndex = this.gestureIndexFromClassIndex(res.classIndex)
+      const classIndex = parseInt(res.label)
+      const gestureIndex = this.gestureIndexFromClassIndex(classIndex)
       const neutralDetected = gestureIndex === -2
       const gesture = neutralDetected
         ? undefined
@@ -360,7 +361,7 @@ export default {
         if (accuracy < requiredAccuracy) {
           if (this.verifyingRetried) {
             // Go back to start
-            this.$emit('verificationFailed', this.getModelJson())
+            this.getModelJson().then(x => this.$emit('verificationFailed', x))
             this.reset()
             return
           } else {
@@ -389,14 +390,14 @@ export default {
       if ((this.currentGestureIndex === -2 && this.trainNeutralLast) ||
         doneLastGesture) {
         if (this.state === 'training' && this.doVerification) {
-          this.$emit('doneTraining', this.getModelJson())
+          this.getModelJson().then(x => this.$emit('doneTraining', x))
           this.state = 'testing'
           this.currentGestureIndex = !this.trainNeutralLast ? -2 : 0
           this.preparing = true
         } else {
           if (this.state === 'testing') {
             // verification completed successfully!
-            this.$emit('doneVerification', this.getModelJson())
+            this.getModelJson().then(x => this.$emit('doneVerification', x))
           }
           this.state = 'predicting'
           this.currentGestureIndex = -1
@@ -480,24 +481,28 @@ export default {
         return classIndex === 0 ? -2 : classIndex - 1
       }
     },
-    getModelJson () {
-      // With thanks to https://github.com/tensorflow/tfjs/issues/633#issuecomment-456308218
+    async getModelJson () {
+      // With thanks to https://github.com/tensorflow/tfjs/issues/633#issuecomment-660642769
       const dataset = this.knn.getClassifierDataset()
-      const datasetObj = {}
-      Object.keys(dataset).forEach(key => {
-        const data = dataset[key].dataSync()
-        datasetObj[key] = Array.from(data)
-      })
-      return JSON.stringify(datasetObj)
+      const data = []
+      for (const label in dataset) {
+        data.push({
+          label,
+          values: Array.from(await dataset[label].data()),
+          shape: dataset[label].shape
+        })
+      }
+      return JSON.stringify(data)
     },
     loadModelFromJson (json) {
-      // With thanks to https://github.com/tensorflow/tfjs/issues/633#issuecomment-456308218
-      const tensorObj = JSON.parse(json)
+      // With thanks to https://github.com/tensorflow/tfjs/issues/633#issuecomment-660642769
+      const model = JSON.parse(json)
       // convert back to tensor
-      Object.keys(tensorObj).forEach(key => {
-        tensorObj[key] = tensor(tensorObj[key], [tensorObj[key].length / 1000, 1000])
+      const dataset = {}
+      model.forEach(example => {
+        dataset[example.label] = tensor(example.values, example.shape)
       })
-      this.knn.setClassifierDataset(tensorObj)
+      this.knn.setClassifierDataset(dataset)
     }
   },
   destroyed: function () {
