@@ -12,11 +12,20 @@ export default {
       entry: path.resolve(__dirname, 'lib/index.js'),
       name: 'vue-camera-gestures',
     },
+    outDir: 'dist-plain',
     rollupOptions: {
-      external: ['vue'],
+      external: [
+        'vue',
+        '@tensorflow/tfjs',
+        '@tensorflow-models/mobilenet',
+        '@tensorflow-models/knn-classifier',
+      ],
       output: {
         globals: {
           vue: 'Vue',
+          '@tensorflow/tfjs': 'tf',
+          '@tensorflow-models/mobilenet': 'mobilenet',
+          '@tensorflow-models/knn-classifier': 'knnClassifier',
         },
         exports: 'named'
       },

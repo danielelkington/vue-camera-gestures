@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import CameraGestures from './cameraGestures.vue'
+import CameraGestures from '../lib/cameraGestures.vue'
 export default {
   components: {
     CameraGestures
