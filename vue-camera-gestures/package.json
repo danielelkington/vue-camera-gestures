@@ -1,6 +1,15 @@
 {
   "name": "vue-camera-gestures",
   "version": "2.0.0-alpha1",
+  "files": ["dist"],
+  "main": "./dist/vue-camera-gestures.umd.js",
+  "module": "./dist/vue-camera-gestures.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/vue-camera-gestures.es.js",
+      "require": "./dist/vue-camera-gestures.umd.js"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
