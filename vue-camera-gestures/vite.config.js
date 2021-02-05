@@ -10,7 +10,8 @@ export default {
   build: {
     lib: {
       entry: path.resolve(__dirname, 'lib/index.js'),
-      name: 'vue-camera-gestures',
+      name: 'CameraGestures',
+      formats: ['es', 'iife', 'umd']
     },
     rollupOptions: {
       external: ['vue'],
