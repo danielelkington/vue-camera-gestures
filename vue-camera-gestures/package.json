@@ -1,9 +1,11 @@
 {
   "name": "vue-camera-gestures",
   "version": "2.0.0-alpha1",
+  "description": "Let users control your Vue app using AI and their camera in just 1 line of HTML!",
   "files": ["dist"],
   "main": "./dist/vue-camera-gestures.umd.js",
   "module": "./dist/vue-camera-gestures.es.js",
+  "unpkg": "dist/vue-camera-gestures.iife.js",
   "exports": {
     ".": {
       "import": "./dist/vue-camera-gestures.es.js",
@@ -15,6 +17,22 @@
     "build": "vite build && vite build --config vite-no-dependencies.config.js",
     "serve": "vite preview"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danielelkington/vue-camera-gestures.git"
+  },
+  "keywords": [
+    "vue",
+    "vuejs",
+    "camera",
+    "ai"
+  ],
+  "author": "Daniel Elkington",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/danielelkington/vue-camera-gestures/issues"
+  },
+  "homepage": "https://vue.cameragestures.com/",
   "dependencies": {
     "vue": "^3.0.5"
   },
