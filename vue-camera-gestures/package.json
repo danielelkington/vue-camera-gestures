@@ -2,7 +2,9 @@
   "name": "vue-camera-gestures",
   "version": "2.0.0-alpha1",
   "description": "Let users control your Vue app using AI and their camera in just 1 line of HTML!",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/vue-camera-gestures.umd.js",
   "module": "./dist/vue-camera-gestures.es.js",
   "unpkg": "dist/vue-camera-gestures.iife.js",
@@ -15,7 +17,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && vite build --config vite-no-dependencies.config.js",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:serve": "vitepress serve docs"
   },
   "repository": {
     "type": "git",
@@ -46,7 +51,8 @@
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-vue": "^7.0.0-beta.4",
     "prettier": "^2.2.1",
-    "vite": "2.0.0-beta.64"
+    "vite": "2.0.0-beta.64",
+    "vitepress": "^0.11.5"
   },
   "peerDependencies": {
     "@tensorflow-models/knn-classifier": "^1.2.2",
