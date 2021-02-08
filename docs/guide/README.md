@@ -5,6 +5,10 @@ Vue Camera Gestures is a component that when placed on a page will
 - Prompt the user to repeat the gestures to verify the AI model
 - Emit events when the user performs the gestures
 
+::: warning Vue Support
+Currently Vue Camera Gestures only supports Vue 2.x. Vue 3 support is coming soon.
+:::
+
 ## Demo
 <ClientOnly>
   <demo-01></demo-01>
