@@ -15,6 +15,7 @@
 
 <script>
 import CameraGestures from "../../dist/vue-camera-gestures.es.js"
+import '../../dist/style.css'
 export default {
   components: {
     CameraGestures

@@ -19,7 +19,7 @@ footer: MIT Licensed | Copyright © 2019-present Daniel Elkington
 </ClientOnly>
 
 <script>
-  import LoadMobileNet from 'components/load-mobile-net.vue'
+  import LoadMobileNet from './components/load-mobile-net.vue'
   export default {
     components: {
       LoadMobileNet
