@@ -14,7 +14,8 @@
 </template>
 
 <script>
-import CameraGestures from "../../../dist/vue-camera-gestures.esm.js";
+import CameraGestures from "../../dist/vue-camera-gestures.es.js"
+import '../../dist/style.css'
 export default {
   components: {
     CameraGestures
@@ -23,9 +24,9 @@ export default {
     return {
       demoStarted: false,
       direction: "Left"
-    };
+    }
   }
-};
+}
 </script>
 
 <style scoped>

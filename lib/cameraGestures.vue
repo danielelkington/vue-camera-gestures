@@ -5,8 +5,8 @@
       :loading="busyLoadingMobilenet"
     >
       <div
-        class="camera-gestures-loader-container"
         v-if="busyLoadingMobilenet"
+        class="camera-gestures-loader-container"
       >
         <div class="camera-gestures-lds-ring">
           <div></div>
@@ -17,13 +17,13 @@
       </div>
     </slot>
     <video
+      v-show="!busyLoadingMobilenet && showCameraFeed"
       ref="video"
       autoplay
       playsinline
+      class="camera-gestures-camera-feed"
       @playing="videoPlaying = true"
       @pause="videoPlaying = false"
-      v-show="!busyLoadingMobilenet && showCameraFeed"
-      class="camera-gestures-camera-feed"
     ></video>
     <slot
       name="progress"
@@ -44,8 +44,8 @@
       :eventName="currentEventName"
     >
       <p
-        class="camera-gestures-instructions"
         v-show="currentInstruction"
+        class="camera-gestures-instructions"
       >{{currentInstruction}}</p>
     </slot>
   </div>
@@ -71,10 +71,12 @@ export default {
       default: true
     },
     gestures: {
-      type: Array
+      type: Array,
+      default: undefined
     },
     model: {
-      type: String
+      type: String,
+      default: undefined
     },
     neutralTrainingPrompt: {
       type: String,
@@ -133,16 +135,34 @@ export default {
       default: 1000
     }
   },
+  emits: ['done-training', 'done-verification', 'neutral', 'verification-failed'],
+  data: function () {
+    return {
+      videoPlaying: false,
+      busyLoadingMobilenet: true,
+      // can be "training", "testing" or "predicting"
+      state: 'training',
+      preparing: false,
+      // -1 indicates nothing, -2 indicates neutral
+      currentGestureIndex: -1,
+      timeStartedWaiting: null,
+      timeToFinishWaiting: null,
+      progress: 0,
+      gestureVerifyingCorrectSamples: 0,
+      gestureVerifyingIncorrectSamples: 0,
+      verifyingRetried: false,
+      lastGestureIndexDetected: -1,
+      lastGestureDetectedTime: null
+    }
+  },
   computed: {
     computedGestures: function () {
       if (this.gestures === undefined) {
-        const reservedEventNames = [
-          'DONETRAINING',
-          'DONEVERIFICATION',
-          'NEUTRAL',
-          'VERIFICATIONFAILED'
-        ]
-        const filteredEventNames = Object.keys(this.$listeners).filter(x => !reservedEventNames.includes(x.toUpperCase()))
+        const filteredEventNames = 
+          Object.keys(this.$attrs)
+            .filter(x => x.startsWith('on')) // events only
+            .map(x => x.substring(2)) // remove "on" prefix
+            .map(x => x.toLowerCase())
         return filteredEventNames.map(x => {
           // convert event name from camelCase to Sentence Case
           let name = x.replace(/([A-Z])/g, ' $1')
@@ -243,23 +263,12 @@ export default {
     this.animationFrameId = requestAnimationFrame(this.animate)
     this.updateState()
   },
-  data: function () {
-    return {
-      videoPlaying: false,
-      busyLoadingMobilenet: true,
-      // can be "training", "testing" or "predicting"
-      state: 'training',
-      preparing: false,
-      // -1 indicates nothing, -2 indicates neutral
-      currentGestureIndex: -1,
-      timeStartedWaiting: null,
-      timeToFinishWaiting: null,
-      progress: 0,
-      gestureVerifyingCorrectSamples: 0,
-      gestureVerifyingIncorrectSamples: 0,
-      verifyingRetried: false,
-      lastGestureIndexDetected: -1,
-      lastGestureDetectedTime: null
+  unmounted: function () {
+    if (this.knn) {
+      this.knn.dispose()
+    }
+    if (this.mediaStream) {
+      this.mediaStream.getTracks().forEach(x => x.stop())
     }
   },
   methods: {
@@ -361,7 +370,7 @@ export default {
         if (accuracy < requiredAccuracy) {
           if (this.verifyingRetried) {
             // Go back to start
-            this.getModelJson().then(x => this.$emit('verificationFailed', x))
+            this.getModelJson().then(x => this.$emit('verification-failed', x))
             this.reset()
             return
           } else {
@@ -390,14 +399,14 @@ export default {
       if ((this.currentGestureIndex === -2 && this.trainNeutralLast) ||
         doneLastGesture) {
         if (this.state === 'training' && this.doVerification) {
-          this.getModelJson().then(x => this.$emit('doneTraining', x))
+          this.getModelJson().then(x => this.$emit('done-training', x))
           this.state = 'testing'
           this.currentGestureIndex = !this.trainNeutralLast ? -2 : 0
           this.preparing = true
         } else {
           if (this.state === 'testing') {
             // verification completed successfully!
-            this.getModelJson().then(x => this.$emit('doneVerification', x))
+            this.getModelJson().then(x => this.$emit('done-verification', x))
           }
           this.state = 'predicting'
           this.currentGestureIndex = -1
@@ -503,14 +512,6 @@ export default {
         dataset[example.label] = tensor(example.values, example.shape)
       })
       this.knn.setClassifierDataset(dataset)
-    }
-  },
-  destroyed: function () {
-    if (this.knn) {
-      this.knn.dispose()
-    }
-    if (this.mediaStream) {
-      this.mediaStream.getTracks().forEach(x => x.stop())
     }
   }
 }

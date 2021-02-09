@@ -1,23 +1,26 @@
 {
   "name": "vue-camera-gestures",
-  "version": "0.3.0",
+  "version": "2.0.0-alpha.1",
   "description": "Let users control your Vue app using AI and their camera in just 1 line of HTML!",
-  "main": "dist/vue-camera-gestures.umd.js",
-  "module": "dist/vue-camera-gestures.esm.js",
-  "unpkg": "dist/vue-camera-gestures.min.js",
-  "browser": {
-    "./sfc": "src/vue-camera-gestures.vue"
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/vue-camera-gestures.umd.js",
+  "module": "./dist/vue-camera-gestures.es.js",
+  "unpkg": "dist/vue-camera-gestures.iife.js",
+  "exports": {
+    ".": {
+      "import": "./dist/vue-camera-gestures.es.js",
+      "require": "./dist/vue-camera-gestures.umd.js"
+    }
   },
   "scripts": {
-    "build": "npm run build:umd & npm run build:es & npm run build:unpkg & npm run build:umd-no-dependencies & npm run build:es-no-dependencies & npm run build:unpkg-no-dependencies",
-    "build:umd": "rollup --config build/rollup-with-dependencies.config.js --format umd --file dist/vue-camera-gestures.umd.js",
-    "build:es": "rollup --config build/rollup-with-dependencies.config.js --format es --file dist/vue-camera-gestures.esm.js",
-    "build:unpkg": "rollup --config build/rollup-with-dependencies.config.js --format iife --file dist/vue-camera-gestures.min.js",
-    "build:umd-no-dependencies": "rollup --config build/rollup-no-dependencies.config.js --format umd --file dist/vue-camera-gestures-plain.umd.js",
-    "build:es-no-dependencies": "rollup --config build/rollup-no-dependencies.config.js --format es --file dist/vue-camera-gestures-plain.esm.js",
-    "build:unpkg-no-dependencies": "rollup --config build/rollup-no-dependencies.config.js --format iife --file dist/vue-camera-gestures-plain.min.js",
-    "docs:dev": "npm run build && vuepress dev docs",
-    "docs:build": "npm run build && vuepress build docs"
+    "dev": "vite",
+    "build": "vite build && vite build --config vite-no-dependencies.config.js",
+    "serve": "vite preview",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:serve": "vitepress serve docs"
   },
   "repository": {
     "type": "git",
@@ -34,27 +37,26 @@
   "bugs": {
     "url": "https://github.com/danielelkington/vue-camera-gestures/issues"
   },
-  "homepage": "https://github.com/danielelkington/vue-camera-gestures#readme",
+  "homepage": "https://vue.cameragestures.com/",
+  "dependencies": {
+    "vue": "^3.0.5"
+  },
   "devDependencies": {
     "@tensorflow-models/knn-classifier": "^1.2.2",
     "@tensorflow-models/mobilenet": "^2.0.4",
     "@tensorflow/tfjs": "^1.7.0",
-    "rollup": "^1.32.1",
-    "rollup-plugin-buble": "^0.19.2",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-vue": "^5.1.9",
-    "vue": "^2.6.12",
-    "vue-template-compiler": "^2.6.12",
-    "vuepress": "^1.7.1"
+    "@vitejs/plugin-vue": "1.1.4",
+    "@vue/compiler-sfc": "3.0.5",
+    "eslint": "^7.19.0",
+    "eslint-config-prettier": "^7.2.0",
+    "eslint-plugin-vue": "^7.0.0-beta.4",
+    "prettier": "^2.2.1",
+    "vite": "2.0.0-beta.65",
+    "vitepress": "^0.11.5"
   },
   "peerDependencies": {
     "@tensorflow-models/knn-classifier": "^1.2.2",
     "@tensorflow-models/mobilenet": "^2.0.4",
     "@tensorflow/tfjs": "^1.7.4"
-  },
-  "dependencies": {
-    "node-fetch": "^2.6.1"
   }
 }

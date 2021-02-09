@@ -17,3 +17,12 @@ footer: MIT Licensed | Copyright © 2019-present Daniel Elkington
 <ClientOnly>
   <load-mobile-net></load-mobile-net>
 </ClientOnly>
+
+<script>
+  import LoadMobileNet from './components/load-mobile-net.vue'
+  export default {
+    components: {
+      LoadMobileNet
+    }
+  }
+</script>
