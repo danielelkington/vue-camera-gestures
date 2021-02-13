@@ -5,8 +5,8 @@ Vue Camera Gestures is a component that when placed on a page will
 - Prompt the user to repeat the gestures to verify the AI model
 - Emit events when the user performs the gestures
 
-::: warning Vue Support
-Currently Vue Camera Gestures only supports Vue 2.x. Vue 3 support is coming soon.
+::: danger Vue Support
+This page is only relevant for Vue 2 only. If you are using Vue 3, please go to [vue3.cameragestures.com](https://vue3.cameragestures.com)
 :::
 
 ## Demo
@@ -45,7 +45,7 @@ Note that __the name and number of the events is completely configurable__ - you
 ## Installation
 ### via npm
 ```bash
-npm i vue-camera-gestures --save
+npm i vue-camera-gestures@^1.0.0 --save
 ```
 Register the component globally
 ```js
@@ -68,8 +68,12 @@ export default {
 You can ignore the peer dependency warning as the Tensorflow JS libraries are bundled with the component. You can also [import the Vue Camera Gestures library on its own (only 5KB Gzipped!)](#installing-without-the-bundled-version-of-tensorflow).
 ### via CDN
 ```html
-<script src="https://unpkg.com/vue-camera-gestures"></script>
+<script src="https://unpkg.com/vue-camera-gestures@^1.0.0"></script>
 ```
+
+::: tip
+Version 1.x of vue-camera-gestures is for Vue 2, while version 2.x of vue-camera-gestures is for Vue 3.
+:::
 
 ## Getting Started
 The simplest way to specify both the gestures to be trained and to subscribe to events is to simply subscribe to an event with a name of your choice. Please note that there are a number of [reserved event names](../api-reference/#events).
@@ -339,7 +343,7 @@ export default {
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
-<script src="https://unpkg.com/vue-camera-gestures/dist/vue-camera-gestures-plain.min.js"></script>
+<script src="https://unpkg.com/vue-camera-gestures@^1.0.0/dist/vue-camera-gestures-plain.min.js"></script>
 ```
 ## Improving the initial load time
 When the component is first rendered it will load the mobilenet Tensorflow pre-trained model, which is quite large (~17MB). It may be quicker to load this earlier, before the user gets to the component. This can be done as follows:
