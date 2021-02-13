@@ -1,6 +1,6 @@
 {
   "name": "vue-camera-gestures",
-  "version": "2.0.0-alpha.1",
+  "version": "2.0.0-alpha.2",
   "description": "Let users control your Vue app using AI and their camera in just 1 line of HTML!",
   "files": [
     "dist"
