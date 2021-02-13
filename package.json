@@ -51,8 +51,8 @@
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-vue": "^7.0.0-beta.4",
     "prettier": "^2.2.1",
-    "vite": "2.0.0-beta.65",
-    "vitepress": "^0.11.5"
+    "vite": "2.0.0-beta.69",
+    "vitepress": "^0.12.0"
   },
   "peerDependencies": {
     "@tensorflow-models/knn-classifier": "^1.2.2",
