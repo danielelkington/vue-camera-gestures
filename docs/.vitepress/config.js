@@ -35,13 +35,9 @@ module.exports = {
       { text: 'Guide', link: '/guide/' },
       { text: 'API Reference', link: '/api-reference/' },
     ],
-    sidebar: {
-      // Hack - generates an auto sidebar.
-      '/abc/': [{}]
-    },
     lastUpdated: 'Last Updated',
     repo: 'danielelkington/vue-camera-gestures',
     docsDir: 'docs',
-    editLinks: true,
+    editLinks: true
   }
 }
