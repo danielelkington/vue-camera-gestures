@@ -59,13 +59,15 @@ npm i vue-camera-gestures --save
 Register the component globally
 ```js
 import CameraGestures from 'vue-camera-gestures'
+import 'vue-camera-gestures/dist/style.css'
 
-Vue.component('camera-gestures', CameraGestures)
+app.component('camera-gestures', CameraGestures)
 ```
 Or register it in a Single File Component
 ```html
 <script>
 import CameraGestures from 'vue-camera-gestures'
+import 'vue-camera-gestures/dist/style.css'
 
 export default {
   components: {
@@ -77,7 +79,16 @@ export default {
 You can ignore the peer dependency warning as the Tensorflow JS libraries are bundled with the component. You can also [import the Vue Camera Gestures library on its own (only 5KB Gzipped!)](#installing-without-the-bundled-version-of-tensorflow).
 ### via CDN
 ```html
-<script src="https://unpkg.com/vue-camera-gestures"></script>
+<link rel="stylesheet" href="https://unpkg.com/vue-camera-gestures@next/dist/style.css"></link>
+<script src="https://unpkg.com/vue-camera-gestures@next"></script>
+
+<script>
+  const app = Vue.createApp({
+    // ...
+  })
+  app.component('camera-gestures', CameraGesturesComponent)
+  
+</script>
 ```
 
 ## Getting Started
