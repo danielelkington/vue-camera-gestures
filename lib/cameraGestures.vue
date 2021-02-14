@@ -262,6 +262,7 @@ export default {
     this.$refs.video.play()
     this.animationFrameId = requestAnimationFrame(this.animate)
     this.updateState()
+    this.silenceWarnings()
   },
   unmounted: function () {
     if (this.knn) {
@@ -270,6 +271,7 @@ export default {
     if (this.mediaStream) {
       this.mediaStream.getTracks().forEach(x => x.stop())
     }
+    this.unsilenceWarnings()
   },
   methods: {
     async animate () {
@@ -330,18 +332,24 @@ export default {
       this.lastGestureIndexDetected = gestureIndex
 
       if (gestureIndex !== lastGestureIndex) {
+        this.silenceWarnings()
         this.$emit(event)
+        this.unsilenceWarnings()
         this.lastGestureDetectedTime = new Date().getTime()
       } else if (!fireOnce) {
         if (throttleEvent > 0) {
           const time = new Date().getTime()
           if (time - this.lastGestureDetectedTime >= throttleEvent) {
+            this.silenceWarnings()
             this.$emit(event)
+            this.unsilenceWarnings()
             this.lastGestureDetectedTime = time
           }
         } else {
           // event is to be fired every frame it is detected
+          this.silenceWarnings()
           this.$emit(event)
+          this.unsilenceWarnings()
         }
       }
       logits.dispose()
@@ -512,6 +520,22 @@ export default {
         dataset[example.label] = tensor(example.values, example.shape)
       })
       this.knn.setClassifierDataset(dataset)
+    },
+    silenceWarnings () {
+      // Vue will warn you if you emit an event that is not declared in `emits`.
+      // Since our component emits events dynamically, we don't want to emit this warning.
+      // This approach inspired from https://github.com/vuejs/vue-test-utils-next/pull/198/files
+      this.consoleWarnSave = console.warn
+      console.warn = (msg, ...rest) => {
+        if (msg.includes('[Vue warn]: Component emitted event')) {
+          return
+        } else {
+          this.consoleWarnSave(msg, ...rest)
+        }
+      }
+    },
+    unsilenceWarnings () {
+      console.warn = this.consoleWarnSave
     }
   }
 }
