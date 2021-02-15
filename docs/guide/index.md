@@ -91,6 +91,10 @@ You can ignore the peer dependency warning as the Tensorflow JS libraries are bu
 </script>
 ```
 
+::: tip
+For production, it is recommended that you link to a specific veresion number to avoid unexpected breakage from newer versions.
+:::
+
 ## Getting Started
 The simplest way to specify both the gestures to be trained and to subscribe to events is to simply subscribe to an event with a name of your choice. Please note that there are a number of [reserved event names](../api-reference/#events).
 ```html
