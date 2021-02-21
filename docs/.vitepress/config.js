@@ -35,6 +35,10 @@ module.exports = {
       { text: 'Guide', link: '/guide/' },
       { text: 'API Reference', link: '/api-reference/' },
     ],
+    algolia: {
+      apiKey: 'fc614fd11a0a9d86cd7be3beb477311f',
+      indexName: 'cameragestures'
+    },
     lastUpdated: 'Last Updated',
     repo: 'danielelkington/vue-camera-gestures',
     docsDir: 'docs',
