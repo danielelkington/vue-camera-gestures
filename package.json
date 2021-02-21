@@ -3,7 +3,8 @@
   "version": "2.0.0-alpha.4",
   "description": "Let users control your Vue app using AI and their camera in just 1 line of HTML!",
   "files": [
-    "dist"
+    "dist",
+    "dist-plain"
   ],
   "main": "./dist/vue-camera-gestures.umd.js",
   "module": "./dist/vue-camera-gestures.es.js",
@@ -39,6 +40,7 @@
   },
   "homepage": "https://vue.cameragestures.com/",
   "dependencies": {
+    "node-fetch": "^2.6.1",
     "vue": "^3.0.5"
   },
   "devDependencies": {
