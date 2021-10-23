@@ -1,4 +1,7 @@
 # API Reference
+::: danger Vue Support
+This page is only relevant for Vue 2 only. If you are using Vue 3, please go to [vue3.cameragestures.com](https://vue3.cameragestures.com)
+:::
 ## Props
 |Prop name | Type | Default Value | Description|
 | -------- | ---- | ------------- | ---- |
