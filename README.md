@@ -11,8 +11,9 @@ npm i vue-camera-gestures --save
 Register the component globally
 ```js
 import CameraGestures from 'vue-camera-gestures'
+import 'vue-camera-gestures/dist/style.css'
 
-Vue.component('camera-gestures', CameraGestures)
+app.component('camera-gestures', CameraGestures)
 ```
 
 ## Getting Started
