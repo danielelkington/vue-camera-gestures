@@ -6,7 +6,7 @@ Vue Camera Gestures is a component that when placed on a page will
 - Emit events when the user performs the gestures
 
 ::: warning Vue Support
-These are the docs for vue-camera-gestures 2.x, which supports Vue 3. This is currently experimental.
+These are the docs for vue-camera-gestures 2.x, which supports Vue 3. If you are using Vue 2, please go to [vue2.cameragestures.com](https://vue2.cameragestures.com)
 :::
 
 ## Demo
@@ -54,7 +54,7 @@ Note that __the name and number of the events is completely configurable__ - you
 ## Installation
 ### via npm
 ```bash
-npm i vue-camera-gestures@next --save
+npm i vue-camera-gestures --save
 ```
 Register the component globally
 ```js
@@ -79,8 +79,8 @@ export default {
 You can ignore the peer dependency warning as the Tensorflow JS libraries are bundled with the component. You can also [import the Vue Camera Gestures library on its own (only 4KB Gzipped!)](#installing-without-the-bundled-version-of-tensorflow).
 ### via CDN
 ```html
-<link rel="stylesheet" href="https://unpkg.com/vue-camera-gestures@next/dist/style.css"></link>
-<script src="https://unpkg.com/vue-camera-gestures@next"></script>
+<link rel="stylesheet" href="https://unpkg.com/vue-camera-gestures/dist/style.css"></link>
+<script src="https://unpkg.com/vue-camera-gestures"></script>
 
 <script>
   const app = Vue.createApp({
@@ -337,7 +337,7 @@ By default the Tensorflow JS library is bundled with the component, but this may
 npm i @tensorflow/tfjs --save
 npm i @tensorflow-models/knn-classifier --save
 npm i @tensorflow-models/mobilenet --save
-npm i vue-camera-gestures@next --save
+npm i vue-camera-gestures --save
 ```
 
 Register the component globally
@@ -363,11 +363,11 @@ export default {
 
 ### via CDN
 ```html
-<link rel="stylesheet" href="https://unpkg.com/vue-camera-gestures@next/dist-plain/style.css"></link>
+<link rel="stylesheet" href="https://unpkg.com/vue-camera-gestures/dist-plain/style.css"></link>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
-<script src="https://unpkg.com/vue-camera-gestures@next/dist-plain/vue-camera-gestures.iife.js"></script>
+<script src="https://unpkg.com/vue-camera-gestures/dist-plain/vue-camera-gestures.iife.js"></script>
 
 <script>
   const app = Vue.createApp({
