@@ -36,7 +36,8 @@ module.exports = {
       { text: 'API Reference', link: '/api-reference/' },
     ],
     algolia: {
-      apiKey: 'fc614fd11a0a9d86cd7be3beb477311f',
+      appId: 'ADW16RLRMC',
+      apiKey: '7720237913e955174354861df42d834c',
       indexName: 'cameragestures'
     },
     lastUpdated: 'Last Updated',
