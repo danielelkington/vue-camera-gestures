@@ -53,7 +53,7 @@
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-vue": "^7.0.0-beta.4",
     "prettier": "^2.2.1",
-    "vite": "2.0.0-beta.69",
+    "vite": "2.9.13",
     "vitepress": "^0.12.0"
   },
   "peerDependencies": {
